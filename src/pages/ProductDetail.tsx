@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -137,7 +136,7 @@ const ProductDetail = () => {
           <div>
             <div className="aspect-square overflow-hidden rounded-lg border border-satstreet-light bg-satstreet-dark/30">
               <img 
-                src={images[currentImageIndex]} 
+                src={product.imageUrl} 
                 alt={product.name} 
                 className="w-full h-full object-cover"
               />

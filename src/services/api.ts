@@ -1,4 +1,6 @@
 
+import { supabase } from "@/integrations/supabase/client";
+
 export interface Product {
   id: string;
   name: string;
@@ -26,7 +28,7 @@ export const getProducts = async (): Promise<Product[]> => {
       description: 'A cool Bitcoin T-Shirt',
       price: 50000,
       priceInSats: 50000,
-      imageUrl: '/placeholder.svg',
+      imageUrl: 'https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images/bitcoin-tshirt.jpg',
       shopName: 'Satoshi\'s Store',
       priceChangePercentage: 2.5,
       priceHistory: [
@@ -53,7 +55,7 @@ export const getProducts = async (): Promise<Product[]> => {
       description: 'A cool Bitcoin Mug',
       price: 25000,
       priceInSats: 25000,
-      imageUrl: '/placeholder.svg',
+      imageUrl: 'https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images/bitcoin-mug.jpg',
       shopName: 'Nakamoto Shop',
       priceChangePercentage: -1.2,
       priceHistory: [
@@ -80,7 +82,7 @@ export const getProducts = async (): Promise<Product[]> => {
       description: 'A cool Bitcoin Hat',
       price: 30000,
       priceInSats: 30000,
-      imageUrl: '/placeholder.svg',
+      imageUrl: 'https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images/bitcoin-hat.jpg',
       shopName: 'Satoshi\'s Store',
       priceChangePercentage: 0.5,
       priceHistory: [
@@ -179,4 +181,41 @@ export const login = async (email: string, password: string): Promise<User> => {
     email: email,
     walletBalance: 2500000 // 2.5M sats ~ 1 BTC
   };
+};
+
+// New helper function to upload an image to Supabase storage
+export const uploadProductImage = async (file: File): Promise<string | null> => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    const filePath = `${fileName}`;
+    
+    const { data, error } = await supabase.storage
+      .from('product-images')
+      .upload(filePath, file);
+    
+    if (error) {
+      console.error('Error uploading file:', error);
+      return null;
+    }
+    
+    // Get public URL for the uploaded file
+    const { data: { publicUrl } } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(filePath);
+      
+    return publicUrl;
+  } catch (error) {
+    console.error('Error in uploadProductImage:', error);
+    return null;
+  }
+};
+
+// Helper function to get the supabase storage URL
+export const getProductImageUrl = (imagePath: string): string => {
+  const { data: { publicUrl } } = supabase.storage
+    .from('product-images')
+    .getPublicUrl(imagePath);
+    
+  return publicUrl;
 };
