@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,6 +53,21 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				bitcoin: {
+					DEFAULT: '#F7931A',
+					light: '#FAB04C',
+					dark: '#E57A00'
+				},
+				price: {
+					up: '#10B981',
+					down: '#EF4444',
+					neutral: '#9CA3AF'
+				},
+				satstreet: {
+					dark: '#161923',
+					medium: '#22253A',
+					light: '#2D3348'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -84,11 +100,29 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'price-pulse-up': {
+					'0%, 100%': { 
+						backgroundColor: 'transparent' 
+					},
+					'50%': { 
+						backgroundColor: 'rgba(16, 185, 129, 0.2)' 
+					}
+				},
+				'price-pulse-down': {
+					'0%, 100%': { 
+						backgroundColor: 'transparent' 
+					},
+					'50%': { 
+						backgroundColor: 'rgba(239, 68, 68, 0.2)' 
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'price-pulse-up': 'price-pulse-up 2s cubic-bezier(0.4, 0, 0.6, 1)',
+				'price-pulse-down': 'price-pulse-down 2s cubic-bezier(0.4, 0, 0.6, 1)'
 			}
 		}
 	},
