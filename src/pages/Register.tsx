@@ -22,7 +22,7 @@ interface RegisterForm {
 
 const Register = () => {
   const navigate = useNavigate();
-  const { loginWithGoogle, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -66,16 +66,17 @@ const Register = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
-    try {
-      await loginWithGoogle();
-      // Won't reach here immediately due to redirect
-    } catch (err) {
-      // Error is handled by the auth context
-    } finally {
+    // Simulate loading for visual feedback
+    setTimeout(() => {
+      toast({
+        title: 'Google Sign In Disabled',
+        description: 'This feature is currently not available.',
+        variant: 'destructive'
+      });
       setIsGoogleLoading(false);
-    }
+    }, 1000);
   };
 
   return (

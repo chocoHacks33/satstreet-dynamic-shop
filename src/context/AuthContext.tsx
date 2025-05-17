@@ -18,7 +18,6 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -121,30 +120,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      if (error) throw error;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Google login failed');
-      toast({
-        title: 'Login Failed',
-        description: e instanceof Error ? e.message : 'Google login failed',
-        variant: 'destructive'
-      });
-      throw e;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleLogout = async () => {
     setIsLoading(true);
     try {
@@ -166,7 +141,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isLoading,
     error,
     login: handleLogin,
-    loginWithGoogle: handleGoogleLogin,
     logout: handleLogout
   };
 

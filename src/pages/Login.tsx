@@ -18,7 +18,7 @@ interface LoginForm {
 }
 
 const Login = () => {
-  const { login, loginWithGoogle, isAuthenticated, isLoading, error } = useAuth();
+  const { login, isAuthenticated, isLoading, error } = useAuth();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -42,16 +42,17 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
-    try {
-      await loginWithGoogle();
-      // Won't reach here immediately due to redirect
-    } catch (err) {
-      // Error is handled by the auth context
-    } finally {
+    // Simulate loading for visual feedback
+    setTimeout(() => {
+      toast({
+        title: 'Google Sign In Disabled',
+        description: 'This feature is currently not available.',
+        variant: 'destructive'
+      });
       setIsGoogleLoading(false);
-    }
+    }, 1000);
   };
 
   return (
