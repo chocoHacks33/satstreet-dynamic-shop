@@ -5,9 +5,16 @@ export interface Product {
   description: string;
   price: number; // Price in satoshis
   imageUrl: string;
-  shopName: string; // Added to match ProductCard component
-  priceInSats: number; // Added to match ProductCard component
+  shopName: string;
+  priceInSats: number;
   priceChangePercentage?: number; // Optional field for price changes
+  priceHistory: PriceHistoryEntry[]; // Add the missing priceHistory field
+}
+
+export interface PriceHistoryEntry {
+  timestamp: string;
+  price: number;
+  explanation: string;
 }
 
 export const getProducts = async (): Promise<Product[]> => {
@@ -22,6 +29,23 @@ export const getProducts = async (): Promise<Product[]> => {
       imageUrl: '/placeholder.svg',
       shopName: 'Satoshi\'s Store',
       priceChangePercentage: 2.5,
+      priceHistory: [
+        {
+          timestamp: '2024-05-01T10:00:00Z',
+          price: 48000,
+          explanation: 'Price increased due to rising Bitcoin value and higher demand for crypto merchandise.'
+        },
+        {
+          timestamp: '2024-05-08T10:00:00Z',
+          price: 49000,
+          explanation: 'Slight price adjustment following increased material costs.'
+        },
+        {
+          timestamp: '2024-05-15T10:00:00Z',
+          price: 50000,
+          explanation: 'Current price reflects market demand and Bitcoin exchange rate fluctuations.'
+        }
+      ]
     },
     {
       id: '2',
@@ -32,6 +56,23 @@ export const getProducts = async (): Promise<Product[]> => {
       imageUrl: '/placeholder.svg',
       shopName: 'Nakamoto Shop',
       priceChangePercentage: -1.2,
+      priceHistory: [
+        {
+          timestamp: '2024-05-01T10:00:00Z',
+          price: 27000,
+          explanation: 'Initial price based on production costs and market positioning.'
+        },
+        {
+          timestamp: '2024-05-08T10:00:00Z',
+          price: 26000,
+          explanation: 'Price decreased due to promotional campaign.'
+        },
+        {
+          timestamp: '2024-05-15T10:00:00Z',
+          price: 25000,
+          explanation: 'Further price reduction to remain competitive in the market.'
+        }
+      ]
     },
     {
       id: '3',
@@ -42,6 +83,23 @@ export const getProducts = async (): Promise<Product[]> => {
       imageUrl: '/placeholder.svg',
       shopName: 'Satoshi\'s Store',
       priceChangePercentage: 0.5,
+      priceHistory: [
+        {
+          timestamp: '2024-05-01T10:00:00Z',
+          price: 29500,
+          explanation: 'Initial pricing for new product launch.'
+        },
+        {
+          timestamp: '2024-05-08T10:00:00Z',
+          price: 29800,
+          explanation: 'Slight price adjustment due to increased shipping costs.'
+        },
+        {
+          timestamp: '2024-05-15T10:00:00Z',
+          price: 30000,
+          explanation: 'Price increase reflecting higher demand and limited stock.'
+        }
+      ]
     },
   ];
 };
@@ -52,7 +110,7 @@ export const getProduct = async (id: string): Promise<Product | undefined> => {
   return products.find(product => product.id === id);
 };
 
-// Alias for getProduct to match usage in ProductDetail component
+// Properly export getProductById as an alias for getProduct
 export const getProductById = getProduct;
 
 export interface User {
@@ -73,6 +131,7 @@ export interface WalletTransaction {
   amount: number;
   timestamp: string;
   description: string;
+  productId?: string; // Make productId optional
 }
 
 // Mock implementation for wallet info
@@ -97,7 +156,8 @@ export const getWalletInfo = async (): Promise<{
         type: 'purchase',
         amount: -25000,
         timestamp: '2024-05-14T15:45:00Z',
-        description: 'Bitcoin Mug'
+        description: 'Bitcoin Mug',
+        productId: '2' // Add productId for purchase transactions
       },
       {
         id: '3',
