@@ -4,41 +4,65 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import { useForm } from 'react-hook-form';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
-interface LoginForm {
+interface RegisterForm {
+  username: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
-const Login = () => {
-  const { login, loginWithGoogle, isAuthenticated, isLoading, error } = useAuth();
+const Register = () => {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
+  const { loginWithGoogle, isAuthenticated } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<RegisterForm>();
+  
   // Redirect if already authenticated
   if (isAuthenticated) {
     navigate('/');
     return null;
   }
+  
+  const password = watch('password');
 
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: RegisterForm) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      await login(data.email, data.password);
-      toast({
-        title: 'Login Successful',
-        description: 'Welcome back to SatStreet!',
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            username: data.username,
+          },
+        },
       });
-      navigate('/');
-    } catch (err) {
-      // Error is handled by the auth context
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Registration successful!',
+        description: 'Please check your email to confirm your account.',
+      });
+      
+      navigate('/login');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Registration failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -61,8 +85,8 @@ const Login = () => {
       <div className="flex-grow flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md bg-satstreet-medium p-8 rounded-lg border border-satstreet-light shadow-lg">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold mb-2">Welcome to SatStreet</h1>
-            <p className="text-muted-foreground">Login to access your wallet and shop with sats</p>
+            <h1 className="text-2xl font-bold mb-2">Create your SatStreet Account</h1>
+            <p className="text-muted-foreground">Join today and start shopping with bitcoin</p>
           </div>
 
           {error && (
@@ -72,6 +96,21 @@ const Login = () => {
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="satoshi"
+                disabled={isLoading}
+                {...register('username', { required: 'Username is required' })}
+                className="bg-satstreet-light border-satstreet-light"
+              />
+              {errors.username && (
+                <p className="text-red-500 text-xs mt-1">{errors.username.message}</p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -94,11 +133,35 @@ const Login = () => {
                 type="password"
                 placeholder="••••••••"
                 disabled={isLoading}
-                {...register('password', { required: 'Password is required' })}
+                {...register('password', { 
+                  required: 'Password is required',
+                  minLength: {
+                    value: 6,
+                    message: 'Password must be at least 6 characters'
+                  }
+                })}
                 className="bg-satstreet-light border-satstreet-light"
               />
               {errors.password && (
                 <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                disabled={isLoading}
+                {...register('confirmPassword', { 
+                  required: 'Please confirm your password',
+                  validate: value => value === password || 'Passwords do not match'
+                })}
+                className="bg-satstreet-light border-satstreet-light"
+              />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>
               )}
             </div>
 
@@ -110,9 +173,9 @@ const Login = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging in...
+                  Creating Account...
                 </>
-              ) : 'Login'}
+              ) : 'Create Account'}
             </Button>
           </form>
 
@@ -122,7 +185,7 @@ const Login = () => {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-satstreet-medium px-2 text-muted-foreground">
-                Or continue with
+                Or sign up with
               </span>
             </div>
           </div>
@@ -136,7 +199,7 @@ const Login = () => {
             {isGoogleLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Logging in...
+                Connecting...
               </>
             ) : (
               <>
@@ -145,19 +208,19 @@ const Login = () => {
                   alt="Google logo"
                   className="w-5 h-5 mr-2"
                 />
-                Login with Google
+                Sign up with Google
               </>
             )}
           </Button>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don't have an account?{' '}
+            Already have an account?{' '}
             <Button 
               variant="link" 
               className="p-0 h-auto text-bitcoin hover:text-bitcoin-dark"
-              onClick={() => navigate('/register')}
+              onClick={() => navigate('/login')}
             >
-              Sign up
+              Log in
             </Button>
           </p>
         </div>
@@ -168,4 +231,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
