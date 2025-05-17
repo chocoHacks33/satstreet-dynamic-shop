@@ -20,96 +20,141 @@ export interface PriceHistoryEntry {
 }
 
 export const getProducts = async (): Promise<Product[]> => {
-  // Mock implementation
-  return [
-    {
-      id: '1',
-      name: 'Bitcoin T-Shirt',
-      description: 'A cool Bitcoin T-Shirt',
-      price: 50000,
-      priceInSats: 50000,
-      imageUrl: 'https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images/bitcoin-tshirt.jpg',
-      shopName: 'Satoshi\'s Store',
-      priceChangePercentage: 2.5,
-      priceHistory: [
-        {
-          timestamp: '2024-05-01T10:00:00Z',
-          price: 48000,
-          explanation: 'Price increased due to rising Bitcoin value and higher demand for crypto merchandise.'
-        },
-        {
-          timestamp: '2024-05-08T10:00:00Z',
-          price: 49000,
-          explanation: 'Slight price adjustment following increased material costs.'
-        },
-        {
-          timestamp: '2024-05-15T10:00:00Z',
-          price: 50000,
-          explanation: 'Current price reflects market demand and Bitcoin exchange rate fluctuations.'
-        }
-      ]
-    },
-    {
-      id: '2',
-      name: 'Bitcoin Mug',
-      description: 'A cool Bitcoin Mug',
-      price: 25000,
-      priceInSats: 25000,
-      imageUrl: 'https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images/bitcoin-mug.jpg',
-      shopName: 'Nakamoto Shop',
-      priceChangePercentage: -1.2,
-      priceHistory: [
-        {
-          timestamp: '2024-05-01T10:00:00Z',
-          price: 27000,
-          explanation: 'Initial price based on production costs and market positioning.'
-        },
-        {
-          timestamp: '2024-05-08T10:00:00Z',
-          price: 26000,
-          explanation: 'Price decreased due to promotional campaign.'
-        },
-        {
-          timestamp: '2024-05-15T10:00:00Z',
-          price: 25000,
-          explanation: 'Further price reduction to remain competitive in the market.'
-        }
-      ]
-    },
-    {
-      id: '3',
-      name: 'Bitcoin Hat',
-      description: 'A cool Bitcoin Hat',
-      price: 30000,
-      priceInSats: 30000,
-      imageUrl: 'https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images/bitcoin-hat.jpg',
-      shopName: 'Satoshi\'s Store',
-      priceChangePercentage: 0.5,
-      priceHistory: [
-        {
-          timestamp: '2024-05-01T10:00:00Z',
-          price: 29500,
-          explanation: 'Initial pricing for new product launch.'
-        },
-        {
-          timestamp: '2024-05-08T10:00:00Z',
-          price: 29800,
-          explanation: 'Slight price adjustment due to increased shipping costs.'
-        },
-        {
-          timestamp: '2024-05-15T10:00:00Z',
-          price: 30000,
-          explanation: 'Price increase reflecting higher demand and limited stock.'
-        }
-      ]
-    },
-  ];
+  try {
+    // Fetch products from Supabase
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('*');
+    
+    if (productsError) throw productsError;
+    if (!products) return [];
+
+    // Transform products and add additional data
+    const transformedProducts = await Promise.all(products.map(async (product) => {
+      // Fetch primary image for each product
+      const { data: images, error: imagesError } = await supabase
+        .from('product_images')
+        .select('*')
+        .eq('product_id', product.id)
+        .order('is_primary', { ascending: false })
+        .order('display_order', { ascending: true })
+        .limit(1);
+
+      if (imagesError) console.error('Error fetching images:', imagesError);
+      
+      const imageUrl = images && images.length > 0 
+        ? getProductImageUrl(images[0].image_path)
+        : '/placeholder.svg';
+      
+      // Fetch price history for each product
+      const { data: priceHistory, error: historyError } = await supabase
+        .from('price_history')
+        .select('*')
+        .eq('product_id', product.id)
+        .order('timestamp', { ascending: true });
+
+      if (historyError) console.error('Error fetching price history:', historyError);
+      
+      // Calculate price change percentage
+      let priceChangePercentage = 0;
+      if (priceHistory && priceHistory.length >= 2) {
+        const oldestPrice = priceHistory[0].price;
+        const currentPrice = product.price;
+        priceChangePercentage = ((currentPrice - oldestPrice) / oldestPrice) * 100;
+      }
+
+      // Transform price history to match our interface
+      const formattedPriceHistory = (priceHistory || []).map(entry => ({
+        timestamp: entry.timestamp,
+        price: entry.price,
+        explanation: entry.explanation || ''
+      }));
+
+      return {
+        id: product.id,
+        name: product.name,
+        description: product.description || '',
+        price: product.price,
+        priceInSats: product.price, // Price in sats is the same as price
+        imageUrl,
+        shopName: product.shop_name,
+        priceChangePercentage,
+        priceHistory: formattedPriceHistory
+      };
+    }));
+
+    return transformedProducts;
+  } catch (error) {
+    console.error('Error in getProducts:', error);
+    return [];
+  }
 };
 
 export const getProduct = async (id: string): Promise<Product | undefined> => {
-  // Mock implementation
-  const products = await getProducts();
-  return products.find(product => product.id === id);
+  try {
+    // Fetch the product
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (productError) throw productError;
+    if (!product) return undefined;
+    
+    // Fetch product images
+    const { data: images, error: imagesError } = await supabase
+      .from('product_images')
+      .select('*')
+      .eq('product_id', product.id)
+      .order('is_primary', { ascending: false })
+      .order('display_order', { ascending: true });
+
+    if (imagesError) console.error('Error fetching images:', imagesError);
+    
+    const imageUrl = images && images.length > 0 
+      ? getProductImageUrl(images[0].image_path)
+      : '/placeholder.svg';
+    
+    // Fetch price history
+    const { data: priceHistory, error: historyError } = await supabase
+      .from('price_history')
+      .select('*')
+      .eq('product_id', product.id)
+      .order('timestamp', { ascending: true });
+
+    if (historyError) console.error('Error fetching price history:', historyError);
+    
+    // Calculate price change percentage
+    let priceChangePercentage = 0;
+    if (priceHistory && priceHistory.length >= 2) {
+      const oldestPrice = priceHistory[0].price;
+      const currentPrice = product.price;
+      priceChangePercentage = ((currentPrice - oldestPrice) / oldestPrice) * 100;
+    }
+
+    // Transform price history to match our interface
+    const formattedPriceHistory = (priceHistory || []).map(entry => ({
+      timestamp: entry.timestamp,
+      price: entry.price,
+      explanation: entry.explanation || ''
+    }));
+
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description || '',
+      price: product.price,
+      priceInSats: product.price, // Price in sats is the same as price
+      imageUrl,
+      shopName: product.shop_name,
+      priceChangePercentage,
+      priceHistory: formattedPriceHistory
+    };
+  } catch (error) {
+    console.error('Error in getProduct:', error);
+    return undefined;
+  }
 };
 
 // Properly export getProductById as an alias for getProduct
@@ -183,31 +228,69 @@ export const login = async (email: string, password: string): Promise<User> => {
   };
 };
 
-// New helper function to upload an image to Supabase storage
-export const uploadProductImage = async (file: File): Promise<string | null> => {
+// Helper function to upload an image to Supabase storage
+export const uploadProductImage = async (file: File, productId: string, isPrimary: boolean = false): Promise<string | null> => {
   try {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    const fileName = `${productId}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
     const filePath = `${fileName}`;
     
-    const { data, error } = await supabase.storage
+    // Upload file to storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from('product-images')
       .upload(filePath, file);
     
-    if (error) {
-      console.error('Error uploading file:', error);
+    if (uploadError) {
+      console.error('Error uploading file:', uploadError);
       return null;
     }
     
-    // Get public URL for the uploaded file
-    const { data: { publicUrl } } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(filePath);
-      
+    // Get the public URL for the file
+    const publicUrl = getProductImageUrl(filePath);
+    
+    // Save image reference to product_images table
+    const { data: imageData, error: imageError } = await supabase
+      .from('product_images')
+      .insert([
+        { 
+          product_id: productId,
+          image_path: filePath,
+          is_primary: isPrimary,
+          display_order: 0
+        }
+      ]);
+    
+    if (imageError) {
+      console.error('Error saving image reference:', imageError);
+      return null;
+    }
+    
     return publicUrl;
   } catch (error) {
     console.error('Error in uploadProductImage:', error);
     return null;
+  }
+};
+
+// Helper function to get product images
+export const getProductImages = async (productId: string): Promise<string[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('product_images')
+      .select('image_path')
+      .eq('product_id', productId)
+      .order('is_primary', { ascending: false })
+      .order('display_order', { ascending: true });
+      
+    if (error) {
+      console.error('Error fetching product images:', error);
+      return [];
+    }
+    
+    return data.map(img => getProductImageUrl(img.image_path));
+  } catch (error) {
+    console.error('Error in getProductImages:', error);
+    return [];
   }
 };
 
@@ -218,4 +301,47 @@ export const getProductImageUrl = (imagePath: string): string => {
     .getPublicUrl(imagePath);
     
   return publicUrl;
+};
+
+// Helper function to create a new product
+export const createProduct = async (product: Omit<Product, 'id' | 'imageUrl' | 'priceChangePercentage' | 'priceHistory' | 'priceInSats'>): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .insert([
+        {
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          shop_name: product.shopName
+        }
+      ])
+      .select()
+      .single();
+      
+    if (error) {
+      console.error('Error creating product:', error);
+      return null;
+    }
+    
+    // Add initial price history entry
+    const { error: historyError } = await supabase
+      .from('price_history')
+      .insert([
+        {
+          product_id: data.id,
+          price: product.price,
+          explanation: 'Initial product price'
+        }
+      ]);
+      
+    if (historyError) {
+      console.error('Error creating price history:', historyError);
+    }
+    
+    return data.id;
+  } catch (error) {
+    console.error('Error in createProduct:', error);
+    return null;
+  }
 };

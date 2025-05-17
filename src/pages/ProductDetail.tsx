@@ -1,7 +1,8 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getProductById } from '@/services/api';
+import { getProductById, getProductImages } from '@/services/api';
 import { useRefreshData } from '@/hooks/useRefreshData';
 import { useCart } from '@/context/CartContext';
 import Navbar from '@/components/Navbar';
@@ -10,6 +11,13 @@ import PriceIndicator from '@/components/PriceIndicator';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from '@/components/ui/carousel';
 
 interface ChartTooltipProps {
   active?: boolean;
@@ -44,9 +52,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
-  // In a real app, we'd have multiple images per product
-  const images = ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'];
+  const [productImages, setProductImages] = useState<string[]>([]);
   
   // Fetch product details with react-query
   const { 
@@ -59,6 +65,23 @@ const ProductDetail = () => {
     queryFn: () => getProductById(id || ''),
     enabled: !!id
   });
+  
+  // Fetch product images
+  useEffect(() => {
+    const loadImages = async () => {
+      if (id) {
+        const images = await getProductImages(id);
+        if (images.length === 0) {
+          // If no images, use the main product image or a placeholder
+          setProductImages(product?.imageUrl ? [product.imageUrl] : ['/placeholder.svg']);
+        } else {
+          setProductImages(images);
+        }
+      }
+    };
+    
+    loadImages();
+  }, [id, product]);
   
   // Set up automatic refresh
   const { 
@@ -135,31 +158,55 @@ const ProductDetail = () => {
           {/* Product Images */}
           <div>
             <div className="aspect-square overflow-hidden rounded-lg border border-satstreet-light bg-satstreet-dark/30">
-              <img 
-                src={product.imageUrl} 
-                alt={product.name} 
-                className="w-full h-full object-cover"
-              />
+              {productImages.length > 0 ? (
+                <Carousel className="w-full">
+                  <CarouselContent>
+                    {productImages.map((image, index) => (
+                      <CarouselItem key={index}>
+                        <div className="aspect-square w-full">
+                          <img 
+                            src={image} 
+                            alt={`${product.name} - image ${index + 1}`} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="-left-4 bg-satstreet-medium border-satstreet-light" />
+                  <CarouselNext className="-right-4 bg-satstreet-medium border-satstreet-light" />
+                </Carousel>
+              ) : (
+                <img 
+                  src={product.imageUrl || '/placeholder.svg'} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-4 mt-4">
-              {images.map((image, index) => (
-                <div 
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  className={`aspect-square cursor-pointer overflow-hidden rounded-md border ${
-                    currentImageIndex === index 
-                      ? 'border-bitcoin' 
-                      : 'border-satstreet-light'
-                  }`}
-                >
-                  <img 
-                    src={image}
-                    alt={`${product.name} thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
+            
+            {/* Thumbnails */}
+            {productImages.length > 1 && (
+              <div className="grid grid-cols-4 gap-2 mt-4">
+                {productImages.map((image, index) => (
+                  <div 
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`aspect-square cursor-pointer overflow-hidden rounded-md border ${
+                      currentImageIndex === index 
+                        ? 'border-bitcoin' 
+                        : 'border-satstreet-light'
+                    }`}
+                  >
+                    <img 
+                      src={image}
+                      alt={`${product.name} thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           
           {/* Product Info */}

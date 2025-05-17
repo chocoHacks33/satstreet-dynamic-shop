@@ -9,6 +9,103 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      price_history: {
+        Row: {
+          explanation: string | null
+          id: string
+          price: number
+          product_id: string
+          timestamp: string
+        }
+        Insert: {
+          explanation?: string | null
+          id?: string
+          price: number
+          product_id: string
+          timestamp?: string
+        }
+        Update: {
+          explanation?: string | null
+          id?: string
+          price?: number
+          product_id?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_images: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          image_path: string
+          is_primary: boolean | null
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_path: string
+          is_primary?: boolean | null
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_path?: string
+          is_primary?: boolean | null
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price: number
+          shop_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          price: number
+          shop_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          shop_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
