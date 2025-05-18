@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PriceIndicator from '@/components/PriceIndicator';
+import PriceFormula from '@/components/PriceFormula';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -164,6 +165,11 @@ const ProductDetail = () => {
     addItem(product);
   };
   
+  // Get the latest price history entry
+  const latestHistoryEntry = product.priceHistory.length > 0 
+    ? product.priceHistory[product.priceHistory.length - 1] 
+    : undefined;
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -289,12 +295,13 @@ const ProductDetail = () => {
               </div>
             </div>
             
-            <div className="bg-satstreet-medium p-4 rounded-lg border border-satstreet-light mb-8">
-              <h3 className="font-medium mb-2">Price Agent Explanation</h3>
-              <p className="text-sm text-muted-foreground">
-                {product.priceHistory[product.priceHistory.length-1]?.explanation || 
-                 'Current price is determined by market demand and Bitcoin exchange rate fluctuations.'}
-              </p>
+            {/* Replace static explanation with animated price formula */}
+            <div className="mb-8">
+              <PriceFormula 
+                currentPrice={product.priceInSats}
+                historyEntry={latestHistoryEntry}
+                productId={product.id}
+              />
             </div>
             
             <Button 
