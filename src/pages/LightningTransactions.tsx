@@ -5,11 +5,14 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Lightning } from 'lucide-react';
+import { LightningBolt, ExternalLink } from 'lucide-react';
 
 const LightningTransactions = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  
+  // Blockchain explorer URL
+  const blockchainExplorerUrl = "https://www.blockchain.com/explorer/addresses/btc/bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh";
   
   // Mock transactions data
   const transactions = [
@@ -57,14 +60,23 @@ const LightningTransactions = () => {
         </Button>
         
         <div className="flex items-center mb-6">
-          <Lightning size={24} className="mr-2 text-bitcoin" />
+          <LightningBolt size={24} className="mr-2 text-bitcoin" />
           <h1 className="text-2xl font-bold">Lightning Network Transactions</h1>
         </div>
         
-        <p className="mb-8 text-muted-foreground">
+        <p className="mb-4 text-muted-foreground">
           These transactions represent Lightning Network activity related to this product, 
           which influences the dynamic pricing model through demand indicators.
         </p>
+        
+        <Button
+          variant="outline"
+          className="mb-8 flex items-center gap-2"
+          onClick={() => window.open(blockchainExplorerUrl, '_blank')}
+        >
+          <ExternalLink size={16} />
+          View on Blockchain Explorer
+        </Button>
         
         <div className="bg-satstreet-medium p-6 rounded-lg border border-satstreet-light">
           <h2 className="text-lg font-medium mb-4">Transaction History</h2>
@@ -74,7 +86,7 @@ const LightningTransactions = () => {
               <div key={tx.id} className="p-4 border border-satstreet-light rounded-md bg-satstreet-dark/30 flex justify-between items-center">
                 <div>
                   <div className="flex items-center">
-                    <Lightning size={14} className="mr-2 text-bitcoin" />
+                    <LightningBolt size={14} className="mr-2 text-bitcoin" />
                     <span className="text-sm font-mono">{tx.id}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
