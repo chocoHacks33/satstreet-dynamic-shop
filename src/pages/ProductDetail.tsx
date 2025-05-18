@@ -97,7 +97,7 @@ const ProductDetail = () => {
         description: "Latest market data has been fetched for this product",
       });
     },
-    intervalMs: 30000 // Change this value to modify refresh interval in milliseconds
+    intervalMs: 300000 // Change this value to modify refresh interval in milliseconds
   });
   
   // Handle manual refresh
