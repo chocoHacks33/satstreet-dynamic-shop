@@ -36,6 +36,7 @@ export const useRefreshData = ({
       }
       
       // Invalidate all relevant queries to force a fresh fetch
+      console.log('Invalidating queries to force refetch...');
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['products'] }),
         queryClient.invalidateQueries({ queryKey: ['product'] }),
@@ -43,6 +44,16 @@ export const useRefreshData = ({
       ]);
       
       console.log('Queries invalidated, data should refresh');
+      
+      // Force refetching of active queries
+      await queryClient.refetchQueries({ 
+        queryKey: ['products'],
+        type: 'active'
+      });
+      await queryClient.refetchQueries({ 
+        queryKey: ['product'],
+        type: 'active'
+      });
       
       // If this refresh should fetch latest prices, show a toast notification
       if (shouldFetchLatestPrices) {

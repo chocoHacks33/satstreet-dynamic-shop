@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from "sonner";
 
 const Admin = () => {
   const [isUpdating, setIsUpdating] = React.useState(false);
@@ -16,11 +17,24 @@ const Admin = () => {
     try {
       const success = await triggerPriceUpdate();
       if (success) {
-        // Invalidate queries to ensure new prices are fetched
+        // Invalidate and immediately refetch queries to ensure new prices are displayed
+        console.log('Triggering query invalidation and refetch');
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['products'] }),
           queryClient.invalidateQueries({ queryKey: ['product'] })
         ]);
+        
+        // Force refetching of active queries
+        await queryClient.refetchQueries({ 
+          queryKey: ['products'],
+          type: 'active'
+        });
+        await queryClient.refetchQueries({ 
+          queryKey: ['product'],
+          type: 'active'
+        });
+        
+        toast.success('All prices have been updated!');
       }
     } finally {
       setIsUpdating(false);

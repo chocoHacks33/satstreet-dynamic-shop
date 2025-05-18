@@ -33,7 +33,17 @@ export const triggerPriceUpdate = async (): Promise<boolean> => {
 export const fetchLatestPrices = async (): Promise<boolean> => {
   try {
     console.log('Fetching latest prices...');
-    // We just need to return true since the invalidation of queries will cause a refetch
+    
+    // Check if the Supabase connection is working
+    const { error } = await supabase.from('products').select('id').limit(1);
+    
+    if (error) {
+      console.error('Error connecting to Supabase:', error);
+      toast.error('Failed to connect to server');
+      return false;
+    }
+    
+    console.log('Successfully connected to Supabase to fetch prices');
     return true;
   } catch (err) {
     console.error('Error in fetchLatestPrices:', err);
@@ -41,4 +51,3 @@ export const fetchLatestPrices = async (): Promise<boolean> => {
     return false;
   }
 };
-
