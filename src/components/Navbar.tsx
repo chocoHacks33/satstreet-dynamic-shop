@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -62,9 +63,9 @@ const Navbar = () => {
         <Link to="/" className="flex items-center">
           <div className="bg-satstreet-dark rounded-full p-1 flex items-center justify-center">
             <img 
-              src="https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2//ChatGPT%20Image%20May%2018,%202025,%2007_59_11%20PM.png" 
+              src="https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2//satstreet_logo_cropped.png" 
               alt="SatStreet" 
-              className="h-8 w-auto mr-2"
+              className="h-12 w-auto mr-3"
             />
           </div>
           <span className="text-xl font-bold bg-clip-text text-transparent bitcoin-gradient">
