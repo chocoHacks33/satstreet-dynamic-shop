@@ -42,7 +42,7 @@ const Index = () => {
         description: "Latest market data has been fetched",
       });
     },
-    intervalMs: 30000 // Change this value to modify refresh interval in milliseconds
+    intervalMs: 300000 // Change this value to modify refresh interval in milliseconds
   });
   
   // Filter products whenever search query or products change
