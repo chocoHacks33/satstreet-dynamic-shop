@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { 
@@ -16,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { LightningBolt, AlertCircle, TrendingUp, Timer, Heart } from 'lucide-react';
+import { Zap, AlertCircle, TrendingUp, Timer, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PriceHistoryEntry } from '@/services/api';
 
@@ -185,14 +186,14 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry,
                     {animatedLightning.number.to(n => Math.floor(n).toLocaleString())}
                   </animated.div>
                   <span className="ml-1">)</span>
-                  <LightningBolt size={12} className="ml-1 text-bitcoin" />
+                  <Zap size={12} className="ml-1 text-bitcoin" />
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
                 <div className="space-y-2">
                   <p>Lightning Network demand indicator</p>
                   <Link to={`/lightning/${productId}`} className="text-bitcoin text-xs flex items-center">
-                    View Lightning transactions <LightningBolt size={12} className="ml-1" />
+                    View Lightning transactions <Zap size={12} className="ml-1" />
                   </Link>
                 </div>
               </TooltipContent>

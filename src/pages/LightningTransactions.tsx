@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { LightningBolt, ExternalLink } from 'lucide-react';
+import { Zap, ExternalLink } from 'lucide-react';
 
 const LightningTransactions = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -60,7 +60,7 @@ const LightningTransactions = () => {
         </Button>
         
         <div className="flex items-center mb-6">
-          <LightningBolt size={24} className="mr-2 text-bitcoin" />
+          <Zap size={24} className="mr-2 text-bitcoin" />
           <h1 className="text-2xl font-bold">Lightning Network Transactions</h1>
         </div>
         
@@ -86,7 +86,7 @@ const LightningTransactions = () => {
               <div key={tx.id} className="p-4 border border-satstreet-light rounded-md bg-satstreet-dark/30 flex justify-between items-center">
                 <div>
                   <div className="flex items-center">
-                    <LightningBolt size={14} className="mr-2 text-bitcoin" />
+                    <Zap size={14} className="mr-2 text-bitcoin" />
                     <span className="text-sm font-mono">{tx.id}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
