@@ -55,12 +55,12 @@ export const getProducts = async (): Promise<Product[]> => {
 
       if (historyError) console.error('Error fetching price history:', historyError);
       
-      // Calculate price change percentage
+      // Calculate price change percentage based on the most recent previous price
       let priceChangePercentage = 0;
       if (priceHistory && priceHistory.length >= 2) {
-        const oldestPrice = priceHistory[0].price;
+        const previousPrice = priceHistory[priceHistory.length - 2].price; // Second-to-last entry
         const currentPrice = product.price;
-        priceChangePercentage = ((currentPrice - oldestPrice) / oldestPrice) * 100;
+        priceChangePercentage = ((currentPrice - previousPrice) / previousPrice) * 100;
       }
 
       // Transform price history to match our interface
@@ -132,12 +132,12 @@ export const getProduct = async (id: string): Promise<Product | undefined> => {
 
     if (historyError) console.error('Error fetching price history:', historyError);
     
-    // Calculate price change percentage
+    // Calculate price change percentage based on the most recent previous price
     let priceChangePercentage = 0;
     if (priceHistory && priceHistory.length >= 2) {
-      const oldestPrice = priceHistory[0].price;
+      const previousPrice = priceHistory[priceHistory.length - 2].price; // Second-to-last entry
       const currentPrice = product.price;
-      priceChangePercentage = ((currentPrice - oldestPrice) / oldestPrice) * 100;
+      priceChangePercentage = ((currentPrice - previousPrice) / previousPrice) * 100;
     }
 
     // Transform price history to match our interface
