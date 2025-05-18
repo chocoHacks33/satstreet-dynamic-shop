@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Product {
@@ -92,6 +91,13 @@ export const getProducts = async (): Promise<Product[]> => {
 
 export const getProduct = async (id: string): Promise<Product | undefined> => {
   try {
+    // Check if the ID is likely a valid UUID format to avoid database errors
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      console.error('Invalid product ID format:', id);
+      return undefined;
+    }
+    
     // Fetch the product
     const { data: product, error: productError } = await supabase
       .from('products')
@@ -145,7 +151,7 @@ export const getProduct = async (id: string): Promise<Product | undefined> => {
       name: product.name,
       description: product.description || '',
       price: product.price,
-      priceInSats: product.price, // Price in sats is the same as price
+      priceInSats: product.price,
       imageUrl,
       shopName: product.shop_name,
       priceChangePercentage,
