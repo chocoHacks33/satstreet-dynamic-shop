@@ -11,6 +11,7 @@ import PriceIndicator from '@/components/PriceIndicator';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { toast } from "sonner";
 import { 
   Carousel, 
   CarouselContent, 
@@ -83,12 +84,19 @@ const ProductDetail = () => {
     loadImages();
   }, [id, product]);
   
-  // Set up automatic refresh
+  // Set up automatic refresh - shorter interval for demo purposes (30 seconds)
   const { 
     isRefreshing,
-    formattedTimeUntilRefresh 
+    formattedTimeUntilRefresh,
+    refreshData
   } = useRefreshData({
-    onRefresh: refetch
+    onRefresh: () => {
+      refetch();
+      toast.success("Price updated!", {
+        description: "Latest market data has been fetched for this product",
+      });
+    },
+    intervalMs: 30000 // 30 seconds for demo purposes
   });
   
   if (isLoading) {
@@ -222,9 +230,15 @@ const ProductDetail = () => {
                 priceChangePercentage={product.priceChangePercentage}
                 size="lg"
               />
-              <div className="mt-1 text-xs text-muted-foreground flex items-center">
+              <div className="mt-1 text-xs text-muted-foreground flex items-center gap-2">
                 <span>Next price update in: {formattedTimeUntilRefresh}</span>
-                {isRefreshing && <span className="ml-2 animate-spin">⟳</span>}
+                <button 
+                  onClick={() => refreshData()}
+                  className={`rounded-full p-1 hover:bg-satstreet-light transition-all ${isRefreshing ? 'animate-spin text-bitcoin' : ''}`}
+                  title="Refresh now"
+                >
+                  ⟳
+                </button>
               </div>
             </div>
             

@@ -1,13 +1,19 @@
 
 import { useCallback, useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from "sonner";
 
 interface UseRefreshDataProps {
   onRefresh?: () => void;
   intervalMs?: number;
+  shouldFetchLatestPrices?: boolean;
 }
 
-export const useRefreshData = ({ onRefresh, intervalMs = 60000 }: UseRefreshDataProps = {}) => {
+export const useRefreshData = ({ 
+  onRefresh, 
+  intervalMs = 60000, 
+  shouldFetchLatestPrices = true 
+}: UseRefreshDataProps = {}) => {
   const queryClient = useQueryClient();
   const [timeUntilRefresh, setTimeUntilRefresh] = useState(intervalMs);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -16,11 +22,17 @@ export const useRefreshData = ({ onRefresh, intervalMs = 60000 }: UseRefreshData
     setIsRefreshing(true);
     
     try {
+      // Invalidate all relevant queries to force a fresh fetch
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['products'] }),
         queryClient.invalidateQueries({ queryKey: ['product'] }),
         queryClient.invalidateQueries({ queryKey: ['wallet'] })
       ]);
+      
+      // If this refresh should fetch latest prices, show a toast notification
+      if (shouldFetchLatestPrices) {
+        toast.info('Prices updated with latest market data');
+      }
       
       // Call the optional onRefresh callback if provided
       if (onRefresh) {
@@ -30,7 +42,7 @@ export const useRefreshData = ({ onRefresh, intervalMs = 60000 }: UseRefreshData
       setIsRefreshing(false);
       setTimeUntilRefresh(intervalMs);
     }
-  }, [queryClient, onRefresh, intervalMs]);
+  }, [queryClient, onRefresh, intervalMs, shouldFetchLatestPrices]);
 
   // Format the time until refresh
   const formattedTimeUntilRefresh = `${Math.floor(timeUntilRefresh / 1000)}s`;

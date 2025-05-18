@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import ProductCard from '@/components/ProductCard';
 import Footer from '@/components/Footer';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from "sonner";
 
 const Index = () => {
   const location = useLocation();
@@ -27,12 +28,19 @@ const Index = () => {
     queryFn: getProducts
   });
   
-  // Set up automatic refresh
+  // Set up automatic refresh - shorter interval for demo purposes (30 seconds)
   const { 
     isRefreshing, 
-    formattedTimeUntilRefresh 
+    formattedTimeUntilRefresh,
+    refreshData
   } = useRefreshData({
-    onRefresh: refetch
+    onRefresh: () => {
+      refetch();
+      toast.success("Prices updated!", {
+        description: "Latest market data has been fetched",
+      });
+    },
+    intervalMs: 30000 // 30 seconds for demo purposes
   });
   
   // Filter products whenever search query or products change
@@ -98,7 +106,7 @@ const Index = () => {
               Sorry, we couldn't load the product catalog. Please try again later.
             </p>
             <button 
-              onClick={() => refetch()} 
+              onClick={() => refreshData()} 
               className="bg-bitcoin hover:bg-bitcoin-dark text-white px-4 py-2 rounded-md"
             >
               Retry
@@ -126,11 +134,17 @@ const Index = () => {
               {filteredProducts.length} products available 
               {searchQuery ? ` for "${searchQuery}"` : ''}
             </p>
-            <div className="text-sm text-muted-foreground flex items-center">
-              <span className="mr-2">
+            <div className="text-sm text-muted-foreground flex items-center gap-2">
+              <span>
                 Prices update in: {formattedTimeUntilRefresh}
               </span>
-              {isRefreshing && <span className="animate-spin">⟳</span>}
+              <button 
+                onClick={() => refreshData()}
+                className={`rounded-full p-1 hover:bg-satstreet-light transition-all ${isRefreshing ? 'animate-spin text-bitcoin' : ''}`}
+                title="Refresh now"
+              >
+                ⟳
+              </button>
             </div>
           </div>
         </div>

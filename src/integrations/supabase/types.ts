@@ -138,7 +138,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      trigger_price_update: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      update_product_prices: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
