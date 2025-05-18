@@ -14,6 +14,11 @@ const LightningTransactions = () => {
   // Blockchain explorer URL
   const blockchainExplorerUrl = "https://www.blockchain.com/explorer/addresses/btc/bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh";
   
+  // Redirect function for blockchain explorer
+  const redirectToBlockchainExplorer = () => {
+    window.open(blockchainExplorerUrl, '_blank');
+  };
+  
   // Mock transactions data
   const transactions = [
     {
@@ -72,14 +77,21 @@ const LightningTransactions = () => {
         <Button
           variant="outline"
           className="mb-8 flex items-center gap-2"
-          onClick={() => window.open(blockchainExplorerUrl, '_blank')}
+          onClick={redirectToBlockchainExplorer}
         >
           <ExternalLink size={16} />
           View on Blockchain Explorer
         </Button>
         
-        <div className="bg-satstreet-medium p-6 rounded-lg border border-satstreet-light">
-          <h2 className="text-lg font-medium mb-4">Transaction History</h2>
+        <div 
+          className="bg-satstreet-medium p-6 rounded-lg border border-satstreet-light cursor-pointer hover:border-bitcoin transition-colors"
+          onClick={redirectToBlockchainExplorer}
+          title="Click to view on Blockchain Explorer"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium">Transaction History</h2>
+            <ExternalLink size={16} className="text-bitcoin" />
+          </div>
           
           <div className="space-y-4">
             {transactions.map(tx => (
