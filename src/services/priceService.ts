@@ -34,16 +34,17 @@ export const fetchLatestPrices = async (): Promise<boolean> => {
   try {
     console.log('Fetching latest prices...');
     
-    // Check if the Supabase connection is working
-    const { error } = await supabase.from('products').select('id').limit(1);
+    // For regular refreshes, we'll actually trigger the price update function too
+    // This ensures new prices are generated and stored in price history
+    const { data, error } = await supabase.rpc('trigger_price_update');
     
     if (error) {
-      console.error('Error connecting to Supabase:', error);
-      toast.error('Failed to connect to server');
+      console.error('Error updating prices:', error);
+      toast.error('Failed to update prices');
       return false;
     }
     
-    console.log('Successfully connected to Supabase to fetch prices');
+    console.log('Prices updated successfully:', data);
     return true;
   } catch (err) {
     console.error('Error in fetchLatestPrices:', err);
