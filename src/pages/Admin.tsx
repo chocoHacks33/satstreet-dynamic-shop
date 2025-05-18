@@ -5,14 +5,23 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Admin = () => {
   const [isUpdating, setIsUpdating] = React.useState(false);
+  const queryClient = useQueryClient();
   
   const handleUpdatePrices = async () => {
     setIsUpdating(true);
     try {
-      await triggerPriceUpdate();
+      const success = await triggerPriceUpdate();
+      if (success) {
+        // Invalidate queries to ensure new prices are fetched
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['products'] }),
+          queryClient.invalidateQueries({ queryKey: ['product'] })
+        ]);
+      }
     } finally {
       setIsUpdating(false);
     }
@@ -37,7 +46,8 @@ const Admin = () => {
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
                 This will generate new prices for all products based on market conditions 
-                and record them in the price history.
+                and record them in the price history. This action calls the database function
+                that updates prices and creates new price history records.
               </p>
             </CardContent>
             

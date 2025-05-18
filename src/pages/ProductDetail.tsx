@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -19,6 +18,7 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from '@/components/ui/carousel';
+import { RefreshCw } from 'lucide-react';
 
 interface ChartTooltipProps {
   active?: boolean;
@@ -91,6 +91,7 @@ const ProductDetail = () => {
     refreshData
   } = useRefreshData({
     onRefresh: () => {
+      console.log('Refreshing product detail from ProductDetail page');
       refetch();
       toast.success("Price updated!", {
         description: "Latest market data has been fetched for this product",
@@ -98,6 +99,12 @@ const ProductDetail = () => {
     },
     intervalMs: 30000 // 30 seconds for demo purposes
   });
+  
+  // Handle manual refresh
+  const handleManualRefresh = () => {
+    console.log('Manual refresh triggered from product detail');
+    refreshData();
+  };
   
   if (isLoading) {
     return (
@@ -232,13 +239,16 @@ const ProductDetail = () => {
               />
               <div className="mt-1 text-xs text-muted-foreground flex items-center gap-2">
                 <span>Next price update in: {formattedTimeUntilRefresh}</span>
-                <button 
-                  onClick={() => refreshData()}
-                  className={`rounded-full p-1 hover:bg-satstreet-light transition-all ${isRefreshing ? 'animate-spin text-bitcoin' : ''}`}
+                <Button
+                  onClick={handleManualRefresh}
+                  variant="ghost"
+                  size="sm"
+                  className={`p-1 rounded-full hover:bg-satstreet-light transition-all ${isRefreshing ? 'animate-spin text-bitcoin' : ''}`}
                   title="Refresh now"
+                  disabled={isRefreshing}
                 >
-                  ⟳
-                </button>
+                  <RefreshCw size={14} />
+                </Button>
               </div>
             </div>
             

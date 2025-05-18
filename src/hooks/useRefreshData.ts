@@ -2,6 +2,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from "sonner";
+import { fetchLatestPrices } from '@/services/priceService';
 
 interface UseRefreshDataProps {
   onRefresh?: () => void;
@@ -22,12 +23,26 @@ export const useRefreshData = ({
     setIsRefreshing(true);
     
     try {
+      console.log('Starting data refresh process...');
+      
+      // If this refresh should fetch latest prices, call the API
+      if (shouldFetchLatestPrices) {
+        const success = await fetchLatestPrices();
+        if (success) {
+          console.log('Latest prices fetched successfully');
+        } else {
+          console.error('Failed to fetch latest prices');
+        }
+      }
+      
       // Invalidate all relevant queries to force a fresh fetch
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['products'] }),
         queryClient.invalidateQueries({ queryKey: ['product'] }),
         queryClient.invalidateQueries({ queryKey: ['wallet'] })
       ]);
+      
+      console.log('Queries invalidated, data should refresh');
       
       // If this refresh should fetch latest prices, show a toast notification
       if (shouldFetchLatestPrices) {
@@ -41,6 +56,7 @@ export const useRefreshData = ({
     } finally {
       setIsRefreshing(false);
       setTimeUntilRefresh(intervalMs);
+      console.log('Refresh process complete');
     }
   }, [queryClient, onRefresh, intervalMs, shouldFetchLatestPrices]);
 

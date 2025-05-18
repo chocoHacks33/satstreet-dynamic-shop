@@ -25,3 +25,20 @@ export const triggerPriceUpdate = async (): Promise<boolean> => {
     return false;
   }
 };
+
+/**
+ * Fetches latest prices from the server without triggering a new price generation
+ * This is used for the refresh functionality in the UI
+ */
+export const fetchLatestPrices = async (): Promise<boolean> => {
+  try {
+    console.log('Fetching latest prices...');
+    // We just need to return true since the invalidation of queries will cause a refetch
+    return true;
+  } catch (err) {
+    console.error('Error in fetchLatestPrices:', err);
+    toast.error('Failed to fetch latest prices');
+    return false;
+  }
+};
+

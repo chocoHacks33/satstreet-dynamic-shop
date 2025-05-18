@@ -9,6 +9,8 @@ import ProductCard from '@/components/ProductCard';
 import Footer from '@/components/Footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from "sonner";
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 const Index = () => {
   const location = useLocation();
@@ -35,6 +37,7 @@ const Index = () => {
     refreshData
   } = useRefreshData({
     onRefresh: () => {
+      console.log('Refreshing products from Index page');
       refetch();
       toast.success("Prices updated!", {
         description: "Latest market data has been fetched",
@@ -61,6 +64,12 @@ const Index = () => {
     
     setFilteredProducts(filtered);
   }, [products, searchQuery]);
+  
+  // Handle manual refresh
+  const handleManualRefresh = () => {
+    console.log('Manual refresh triggered');
+    refreshData();
+  };
   
   // Handle loading state
   if (isLoading) {
@@ -138,13 +147,16 @@ const Index = () => {
               <span>
                 Prices update in: {formattedTimeUntilRefresh}
               </span>
-              <button 
-                onClick={() => refreshData()}
+              <Button 
+                onClick={handleManualRefresh}
+                variant="ghost"
+                size="sm"
                 className={`rounded-full p-1 hover:bg-satstreet-light transition-all ${isRefreshing ? 'animate-spin text-bitcoin' : ''}`}
                 title="Refresh now"
+                disabled={isRefreshing}
               >
-                ⟳
-              </button>
+                <RefreshCw size={16} />
+              </Button>
             </div>
           </div>
         </div>
