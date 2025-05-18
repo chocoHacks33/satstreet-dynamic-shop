@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -55,6 +56,7 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
+  const [selectedPriceEntry, setSelectedPriceEntry] = useState<any>(null);
   
   // Fetch product details with react-query
   const { 
@@ -106,6 +108,26 @@ const ProductDetail = () => {
     console.log('Manual refresh triggered from product detail');
     refreshData();
   };
+
+  // Handle chart point selection
+  const handleChartMouseMove = (chartState: any) => {
+    if (chartState && chartState.isTooltipActive && chartState.activePayload && chartState.activePayload[0]) {
+      setSelectedPriceEntry(chartState.activePayload[0].payload);
+    }
+  };
+  
+  // Handle chart mouse leave
+  const handleChartMouseLeave = () => {
+    setSelectedPriceEntry(null);
+  };
+  
+  useEffect(() => {
+    // Set the initial price entry to the latest one when product data is loaded
+    if (product && product.priceHistory.length > 0) {
+      const latestEntry = product.priceHistory[product.priceHistory.length - 1];
+      setSelectedPriceEntry(latestEntry);
+    }
+  }, [product]);
   
   if (isLoading) {
     return (
@@ -165,10 +187,12 @@ const ProductDetail = () => {
     addItem(product);
   };
   
-  // Get the latest price history entry
-  const latestHistoryEntry = product.priceHistory.length > 0 
-    ? product.priceHistory[product.priceHistory.length - 1] 
-    : undefined;
+  // Get the latest price history entry or the selected one from the chart
+  const displayedHistoryEntry = selectedPriceEntry || 
+    (product.priceHistory.length > 0 ? product.priceHistory[product.priceHistory.length - 1] : undefined);
+  
+  // Display price from selected entry or current price
+  const displayedPrice = selectedPriceEntry ? selectedPriceEntry.price : product.priceInSats;
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -265,7 +289,11 @@ const ProductDetail = () => {
               <h2 className="text-lg font-medium mb-4">Price History</h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
+                  <AreaChart 
+                    data={chartData}
+                    onMouseMove={handleChartMouseMove}
+                    onMouseLeave={handleChartMouseLeave}
+                  >
                     <defs>
                       <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#F7931A" stopOpacity={0.8}/>
@@ -295,13 +323,21 @@ const ProductDetail = () => {
               </div>
             </div>
             
-            {/* Replace static explanation with animated price formula */}
+            {/* Dynamic price formula that updates when chart points are selected */}
             <div className="mb-8">
               <PriceFormula 
-                currentPrice={product.priceInSats}
-                historyEntry={latestHistoryEntry}
+                currentPrice={displayedPrice}
+                historyEntry={displayedHistoryEntry}
                 productId={product.id}
               />
+              {selectedPriceEntry && (
+                <div className="mt-2 text-xs text-bitcoin">
+                  <span className="flex items-center gap-1">
+                    <span>🔍</span>
+                    Viewing pricing data from {new Date(selectedPriceEntry.timestamp).toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
             
             <Button 

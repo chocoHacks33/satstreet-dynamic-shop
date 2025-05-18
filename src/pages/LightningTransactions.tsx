@@ -16,7 +16,7 @@ const LightningTransactions = () => {
   
   // Redirect function for blockchain explorer
   const redirectToBlockchainExplorer = () => {
-    window.open(blockchainExplorerUrl, '_blank');
+    window.open(blockchainExplorerUrl, '_blank', 'noopener,noreferrer');
   };
   
   // Mock transactions data

@@ -25,6 +25,7 @@ interface PriceFormulaProps {
   currentPrice: number;
   historyEntry?: PriceHistoryEntry;
   productId: string;
+  onChartPointSelected?: (entry: PriceHistoryEntry) => void;
 }
 
 // Mock coefficients - in a real app these would be retrieved from an ML model
@@ -43,7 +44,12 @@ interface PriceComponents {
   loyaltyDiscount: number;
 }
 
-const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry, productId }) => {
+const PriceFormula: React.FC<PriceFormulaProps> = ({ 
+  currentPrice, 
+  historyEntry, 
+  productId,
+  onChartPointSelected
+}) => {
   // Calculate mock values for each component of the formula
   const calculateComponents = (): PriceComponents => {
     // In a real implementation, these would be actual values from your backend
@@ -131,7 +137,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry,
     <TooltipProvider>
       <div className="bg-satstreet-medium p-5 rounded-lg border border-satstreet-light">
         <h3 className="font-semibold mb-4 text-lg flex items-center">
-          <span className="mr-2">Price Agent Formula</span>
+          <span className="mr-2">Pricing Logic</span>
           <HoverCard>
             <HoverCardTrigger asChild>
               <span className="cursor-help">
@@ -140,10 +146,10 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry,
             </HoverCardTrigger>
             <HoverCardContent className="w-80 bg-satstreet-dark border-satstreet-light">
               <div className="text-sm">
-                <p className="font-medium mb-2">Dynamic Price Calculation</p>
+                <p className="font-medium mb-2">How This Price Is Calculated</p>
                 <p className="text-muted-foreground">
-                  This formula represents how our AI pricing agent calculates product prices
-                  based on multiple market factors. Each component affects the final price.
+                  This breakdown shows you how the current price is determined based on 
+                  market factors like demand, inventory levels, and special promotions.
                 </p>
               </div>
             </HoverCardContent>
@@ -152,13 +158,13 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry,
         
         <div className="font-mono text-base md:text-lg space-y-3">
           {/* Full Formula */}
-          <div className="mb-4 font-medium text-center">
+          <div className="mb-4 font-medium text-center hidden md:block">
             P = B + α(DLN) + β(Sinv) + γ(Tevent) - δ(Ldiscount)
           </div>
           
           {/* Calculated Formula with Values */}
-          <div className="flex flex-wrap items-center">
-            <div className="font-medium mr-2 text-bitcoin">P =</div>
+          <div className="flex flex-wrap items-center gap-y-2">
+            <div className="font-medium mr-2 text-bitcoin">Price =</div>
             
             {/* Base Price */}
             <Tooltip>
@@ -170,7 +176,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry,
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
-                <p>Base price (MSRP)</p>
+                <p>Base price (starting value)</p>
               </TooltipContent>
             </Tooltip>
             
@@ -179,22 +185,27 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry,
             {/* Lightning Demand */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-bitcoin/30 inline-flex items-center group relative">
-                  <span className="mr-1 text-xs text-bitcoin">{mockCoefficients.alpha}</span>
-                  <span className="mr-1">(</span>
-                  <animated.div>
-                    {animatedLightning.number.to(n => Math.floor(n).toLocaleString())}
-                  </animated.div>
-                  <span className="ml-1">)</span>
-                  <Zap size={12} className="ml-1 text-bitcoin" />
+                <div className="group relative">
+                  <Link 
+                    to={`/lightning/${productId}`}
+                    target="_blank"
+                    rel="noopener noreferrer" 
+                    className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-bitcoin/30 inline-flex items-center hover:border-bitcoin transition-colors"
+                  >
+                    <span className="mr-1 text-xs text-bitcoin">{mockCoefficients.alpha}</span>
+                    <span className="mr-1">(</span>
+                    <animated.div>
+                      {animatedLightning.number.to(n => Math.floor(n).toLocaleString())}
+                    </animated.div>
+                    <span className="ml-1">)</span>
+                    <Zap size={12} className="ml-1 text-bitcoin" />
+                  </Link>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
                 <div className="space-y-2">
-                  <p>Lightning Network demand indicator</p>
-                  <Link to={`/lightning/${productId}`} className="text-bitcoin text-xs flex items-center">
-                    View Lightning transactions <Zap size={12} className="ml-1" />
-                  </Link>
+                  <p>Market demand from Lightning Network activity</p>
+                  <p className="text-xs text-muted-foreground">Click to view transactions in new tab</p>
                 </div>
               </TooltipContent>
             </Tooltip>
@@ -215,7 +226,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry,
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
-                <p>Inventory level factor (decreases with higher stock)</p>
+                <p>Supply adjustment based on current inventory levels</p>
               </TooltipContent>
             </Tooltip>
             
@@ -235,7 +246,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry,
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
-                <p>Time-based modifiers (launch events, sales, etc.)</p>
+                <p>Seasonal factors and special events that affect pricing</p>
               </TooltipContent>
             </Tooltip>
             
@@ -255,7 +266,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({ currentPrice, historyEntry,
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
-                <p>Loyalty discounts and promotions</p>
+                <p>Available discounts and promotional offers</p>
               </TooltipContent>
             </Tooltip>
             
