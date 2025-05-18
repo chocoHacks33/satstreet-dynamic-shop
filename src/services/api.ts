@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Product {
@@ -241,9 +242,9 @@ export const uploadProductImage = async (file: File, productId: string, isPrimar
     const fileName = `${productId}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
     const filePath = `${fileName}`;
     
-    // Upload file to storage
+    // Upload file to storage - updated bucket name to "product-images-2"
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('product-images')
+      .from('product-images-2')
       .upload(filePath, file);
     
     if (uploadError) {
@@ -251,7 +252,7 @@ export const uploadProductImage = async (file: File, productId: string, isPrimar
       return null;
     }
     
-    // Get the public URL for the file
+    // Get the public URL for the file - updated bucket name to "product-images-2"
     const publicUrl = getProductImageUrl(filePath);
     
     // Save image reference to product_images table
@@ -300,10 +301,10 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
   }
 };
 
-// Helper function to get the supabase storage URL
+// Helper function to get the supabase storage URL - updated bucket name to "product-images-2"
 export const getProductImageUrl = (imagePath: string): string => {
   const { data: { publicUrl } } = supabase.storage
-    .from('product-images')
+    .from('product-images-2')
     .getPublicUrl(imagePath);
     
   return publicUrl;
