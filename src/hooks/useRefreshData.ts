@@ -10,9 +10,10 @@ interface UseRefreshDataProps {
   shouldFetchLatestPrices?: boolean;
 }
 
+// Change the default interval here (currently 60000ms = 60 seconds)
 export const useRefreshData = ({ 
   onRefresh, 
-  intervalMs = 60000, 
+  intervalMs = 60000, // Change this value to modify the default interval in milliseconds
   shouldFetchLatestPrices = true 
 }: UseRefreshDataProps = {}) => {
   const queryClient = useQueryClient();

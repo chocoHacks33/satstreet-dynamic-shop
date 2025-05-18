@@ -84,7 +84,7 @@ const ProductDetail = () => {
     loadImages();
   }, [id, product]);
   
-  // Set up automatic refresh - shorter interval for demo purposes (30 seconds)
+  // Set up automatic refresh - modify the interval here (30000ms = 30 seconds)
   const { 
     isRefreshing,
     formattedTimeUntilRefresh,
@@ -97,7 +97,7 @@ const ProductDetail = () => {
         description: "Latest market data has been fetched for this product",
       });
     },
-    intervalMs: 30000 // 30 seconds for demo purposes
+    intervalMs: 30000 // Change this value to modify refresh interval in milliseconds
   });
   
   // Handle manual refresh

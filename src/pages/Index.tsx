@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -30,7 +29,7 @@ const Index = () => {
     queryFn: getProducts
   });
   
-  // Set up automatic refresh - shorter interval for demo purposes (30 seconds)
+  // Set up automatic refresh - modify the interval here (30000ms = 30 seconds)
   const { 
     isRefreshing, 
     formattedTimeUntilRefresh,
@@ -43,7 +42,7 @@ const Index = () => {
         description: "Latest market data has been fetched",
       });
     },
-    intervalMs: 30000 // 30 seconds for demo purposes
+    intervalMs: 30000 // Change this value to modify refresh interval in milliseconds
   });
   
   // Filter products whenever search query or products change
