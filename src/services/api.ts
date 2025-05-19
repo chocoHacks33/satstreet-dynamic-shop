@@ -108,6 +108,8 @@ export const getProductById = async (id: string): Promise<Product | null> => {
 };
 
 export const getProductImages = async (productId: string): Promise<string[]> => {
+  console.log('Fetching product images for product ID:', productId);
+  
   // Check if there are real product images in Supabase
   const { data: productImages, error } = await supabase
     .from('product_images')
@@ -115,10 +117,14 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
     .eq('product_id', productId)
     .order('display_order', { ascending: true });
 
+  console.log('Product images result:', { productImages, error });
+
   if (!error && productImages && productImages.length > 0) {
+    console.log('Found product images:', productImages);
     return productImages.map(img => img.image_path);
   }
 
+  console.log('No product images found, using placeholders');
   // Return placeholder images if no real images found
   return [
     `/images/product${Math.floor(Math.random() * 6) + 1}.webp`,
@@ -198,11 +204,15 @@ export const uploadProductImage = async (file: File, productId: string) => {
     .getPublicUrl(filePath);
     
   // Save the image reference to the product_images table
-  await supabase.from('product_images').insert({
+  const { error: insertError } = await supabase.from('product_images').insert({
     product_id: productId,
     image_path: data.publicUrl,
     is_primary: false
   });
+  
+  if (insertError) {
+    console.error('Error saving image reference:', insertError);
+  }
   
   return data.publicUrl;
 };

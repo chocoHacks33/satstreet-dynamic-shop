@@ -50,6 +50,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
           src={product.imageUrl} 
           alt={product.name}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            console.error('Product card image failed to load:', product.imageUrl);
+            e.currentTarget.src = '/placeholder.svg';
+          }}
         />
       </div>
       

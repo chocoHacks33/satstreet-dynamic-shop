@@ -75,16 +75,20 @@ const ProductDetail = () => {
     enabled: !!id
   });
   
-  // Fetch product images
+  // Fetch product images - updated for debugging
   useEffect(() => {
     const loadImages = async () => {
       if (id) {
+        console.log('Attempting to load images for product ID:', id);
         const images = await getProductImages(id);
-        if (images.length === 0) {
+        console.log('Loaded images:', images);
+        
+        if (images && images.length > 0) {
+          setProductImages(images);
+        } else {
           // If no images, use the main product image or a placeholder
           setProductImages(product?.imageUrl ? [product.imageUrl] : ['/placeholder.svg']);
-        } else {
-          setProductImages(images);
+          console.log('No images found, using placeholder');
         }
       }
     };
@@ -220,8 +224,12 @@ const ProductDetail = () => {
                         <div className="aspect-square w-full">
                           <img 
                             src={image} 
-                            alt={`${product.name} - image ${index + 1}`} 
+                            alt={`${product?.name || 'Product'} - image ${index + 1}`} 
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.error('Image failed to load:', image);
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
                           />
                         </div>
                       </CarouselItem>
@@ -231,11 +239,16 @@ const ProductDetail = () => {
                   <CarouselNext className="-right-4 bg-satstreet-medium border-satstreet-light" />
                 </Carousel>
               ) : (
-                <img 
-                  src={product.imageUrl || '/placeholder.svg'} 
-                  alt={product.name} 
-                  className="w-full h-full object-cover"
-                />
+                <div className="h-full flex items-center justify-center bg-satstreet-dark/30">
+                  <img 
+                    src={product?.imageUrl || '/placeholder.svg'} 
+                    alt={product?.name || 'Product'} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
+                  />
+                </div>
               )}
             </div>
             
@@ -254,8 +267,11 @@ const ProductDetail = () => {
                   >
                     <img 
                       src={image}
-                      alt={`${product.name} thumbnail ${index + 1}`}
+                      alt={`${product?.name || 'Product'} thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
                     />
                   </div>
                 ))}
