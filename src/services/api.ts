@@ -110,30 +110,14 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
   console.log('Fetching product images for product ID:', productId);
   
   try {
-    // Check if the storage bucket exists
-    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-    
-    if (bucketsError) {
-      console.error('Error listing buckets:', bucketsError);
-      return getPlaceholderImages();
-    }
-    
-    const productImagesBucket = buckets?.find(bucket => bucket.name === 'product-images-2');
-    
-    if (!productImagesBucket) {
-      console.error('Product images bucket "product-images-2" not found in storage');
-      console.log('Available buckets:', buckets?.map(b => b.name));
-      return getPlaceholderImages();
-    }
-    
-    // Check if there are real product images in Supabase
+    // Check for product images in the database table regardless of bucket status
     const { data: productImages, error } = await supabase
       .from('product_images')
       .select('image_path')
       .eq('product_id', productId)
       .order('display_order', { ascending: true });
 
-    console.log('Product images query result:', { productImages, error });
+    console.log('Product images database query result:', { productImages, error });
 
     if (error) {
       console.error('Error fetching product images from database:', error);
@@ -145,23 +129,29 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
       return getPlaceholderImages();
     }
     
+    // Generate direct URLs for the website - bypassing storage bucket issues
+    // Use hard-coded valid image URLs that will work for the demo
+    const publicPath = 'https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2/';
+    
+    // Log the supabase project id for verification
+    console.log('Supabase project ID:', supabase.projectRef);
+    
     // Process the image paths to create proper URLs
     const processedImages = productImages.map(img => {
-      // Check if the image path is already a full URL
+      // If the image path is already a full URL, use it
       if (img.image_path.startsWith('http')) {
         return img.image_path;
       }
       
-      // Otherwise, get the public URL from Supabase storage
-      const { data } = supabase.storage
-        .from('product-images-2')
-        .getPublicUrl(img.image_path);
-      
-      console.log(`Generated URL for ${img.image_path}:`, data?.publicUrl);
-      return data?.publicUrl || getRandomPlaceholder();
+      // Otherwise, construct the URL directly using the known pattern
+      const fullUrl = `${publicPath}${encodeURIComponent(img.image_path)}`;
+      console.log(`Generated URL for ${img.image_path}:`, fullUrl);
+      return fullUrl;
     });
     
-    return processedImages.filter(Boolean) as string[];
+    // Return the processed images or fallback to placeholders if all are invalid
+    const validImages = processedImages.filter(url => url && !url.includes('undefined'));
+    return validImages.length > 0 ? validImages : getPlaceholderImages();
   } catch (err) {
     console.error('Unexpected error in getProductImages:', err);
     return getPlaceholderImages();
@@ -170,6 +160,7 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
 
 // Helper function to get placeholder images
 const getPlaceholderImages = (): string[] => {
+  console.log('Using placeholder images as fallback');
   return [
     getRandomPlaceholder(),
     getRandomPlaceholder(),

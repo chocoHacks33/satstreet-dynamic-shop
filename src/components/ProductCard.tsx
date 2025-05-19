@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PriceIndicator from './PriceIndicator';
@@ -33,9 +34,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
         const images = await getProductImages(product.id);
         console.log('Loaded images for ProductCard:', images);
         
-        if (images && images.length > 0 && !images[0].includes('placeholder')) {
-          console.log('Setting ProductCard image to:', images[0]);
+        if (images && images.length > 0) {
           setProductImage(images[0]);
+          console.log('Setting ProductCard image to:', images[0]);
         } else {
           console.log('No valid images found, using default product image');
         }
