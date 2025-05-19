@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -304,7 +303,8 @@ const ProductDetail = () => {
                     <XAxis 
                       dataKey="date" 
                       stroke="#9CA3AF" 
-                      tick={{fill: '#9CA3AF'}}
+                      tick={false}
+                      axisLine={true}
                     />
                     <YAxis 
                       stroke="#9CA3AF" 
