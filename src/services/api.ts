@@ -137,12 +137,45 @@ export const getWalletInfo = async (userId: string) => {
     
   if (error) {
     console.error('Error fetching wallet info:', error);
-    return { balance: 0, username: 'User' };
+    return { 
+      balance: 0, 
+      username: 'User',
+      publicKey: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
+      transactions: [] 
+    };
   }
+  
+  // Mock transactions for demonstration
+  const mockTransactions = [
+    {
+      id: '1',
+      type: 'deposit',
+      amount: 50000,
+      timestamp: new Date(Date.now() - 86400000).toISOString(),
+      description: 'Initial deposit'
+    },
+    {
+      id: '2',
+      type: 'purchase',
+      amount: -12500,
+      timestamp: new Date(Date.now() - 43200000).toISOString(),
+      description: 'Purchase of UltraFlex Running Shoes',
+      productId: 'bf01fe26-f74d-4655-91ff-e32d257fc41d'
+    },
+    {
+      id: '3',
+      type: 'deposit',
+      amount: 25000,
+      timestamp: new Date(Date.now() - 21600000).toISOString(),
+      description: 'Lightning payment received'
+    }
+  ];
   
   return { 
     balance: data?.wallet_balance || 0, 
-    username: data?.username || 'User'
+    username: data?.username || 'User',
+    publicKey: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
+    transactions: mockTransactions
   };
 };
 

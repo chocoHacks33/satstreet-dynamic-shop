@@ -116,7 +116,7 @@ const TransactionDetails = ({ transaction, onClose }: TransactionDetailsProps) =
                   <div className="flex-1">
                     <h5 className="font-medium">{product.name}</h5>
                     <p className="text-sm text-muted-foreground">{product.shopName}</p>
-                    <p className="text-sm">{formatSats(product.price)} sats</p>
+                    <p className="text-sm">{formatSats(product.priceInSats)} sats</p>
                   </div>
                 </div>
                 <Button 
@@ -217,7 +217,9 @@ const Wallet = () => {
   const fetchWalletInfo = async () => {
     setIsLoading(true);
     try {
-      const walletData = await getWalletInfo();
+      // Using a mock user ID since we don't have real authentication yet
+      const mockUserId = '1';
+      const walletData = await getWalletInfo(mockUserId);
       setWalletInfo(walletData);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch wallet info');

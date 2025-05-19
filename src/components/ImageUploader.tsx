@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, XCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { uploadProductImage } from '@/services/api';
 import { toast } from '@/components/ui/sonner';
 
@@ -35,7 +34,8 @@ const ImageUploader = ({ productId, onImageUploaded }: ImageUploaderProps) => {
     
     setIsUploading(true);
     try {
-      const imageUrl = await uploadProductImage(selectedFile, productId, true);
+      // Removed the third argument that was causing the error
+      const imageUrl = await uploadProductImage(selectedFile, productId);
       
       if (imageUrl) {
         toast.success('Image successfully uploaded');
