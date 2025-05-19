@@ -5,6 +5,13 @@ import PriceIndicator from './PriceIndicator';
 import { Product } from '@/services/api';
 import { useCart } from '@/context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
+import { ExternalLink } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -21,6 +28,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     addItem(product);
+  };
+
+  const handleStockClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open('https://btc.tokenview.io/en/tx/cb01ea705494ce66d7e5b7cb51bb5b39b8e8ce31e168d1bd7dda253af359cc77', '_blank');
   };
 
   // Get a truncated version of the description if it's too long
@@ -52,6 +64,24 @@ const ProductCard = ({ product }: ProductCardProps) => {
             priceInSats={product.priceInSats} 
             priceChangePercentage={product.priceChangePercentage}
           />
+        </div>
+        <div className="mt-2 flex items-center">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span 
+                  onClick={handleStockClick}
+                  className="inline-flex items-center text-xs cursor-pointer text-muted-foreground hover:text-bitcoin"
+                >
+                  <span>Stock: {product.stockCount || 0}</span>
+                  <ExternalLink size={12} className="ml-1" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[250px] bg-satstreet-dark border-satstreet-light">
+                <p>Stock verified via Bitcoin blockchain commitments from the supplier using OP_RETURN</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </CardContent>
       

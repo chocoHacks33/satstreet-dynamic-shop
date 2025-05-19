@@ -19,7 +19,13 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from '@/components/ui/carousel';
-import { RefreshCw } from 'lucide-react';
+import { 
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
+import { ExternalLink, RefreshCw } from 'lucide-react';
 
 interface ChartTooltipProps {
   active?: boolean;
@@ -118,6 +124,10 @@ const ProductDetail = () => {
   // Handle chart mouse leave
   const handleChartMouseLeave = () => {
     setSelectedPriceEntry(null);
+  };
+
+  const handleStockClick = () => {
+    window.open('https://btc.tokenview.io/en/tx/cb01ea705494ce66d7e5b7cb51bb5b39b8e8ce31e168d1bd7dda253af359cc77', '_blank');
   };
   
   useEffect(() => {
@@ -279,6 +289,25 @@ const ProductDetail = () => {
                   <RefreshCw size={14} />
                 </Button>
               </div>
+            </div>
+            
+            <div className="flex items-center mb-4">
+              <TooltipProvider>
+                <UITooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleStockClick}
+                      className="inline-flex items-center text-sm cursor-pointer hover:text-bitcoin transition-colors"
+                    >
+                      <span className="font-medium">Stock: {product.stockCount || 0}</span>
+                      <ExternalLink size={14} className="ml-1" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[300px] bg-satstreet-dark border-satstreet-light">
+                    <p>Stock verified via Bitcoin blockchain commitments from the supplier using OP_RETURN to commit units of product</p>
+                  </TooltipContent>
+                </UITooltip>
+              </TooltipProvider>
             </div>
             
             <p className="text-foreground mb-8">{product.description}</p>
