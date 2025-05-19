@@ -7,11 +7,11 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <div className="flex items-center mb-4">
+            <div className="flex flex-col items-center md:items-start mb-4">
               <img 
-                src="/placeholder.svg" 
+                src="https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2//satstreet_logo_vector.svg" 
                 alt="SatStreet" 
-                className="h-8 w-auto mr-2"
+                className="h-10 w-auto mb-3"
               />
               <span className="text-xl font-bold bg-clip-text text-transparent bitcoin-gradient">
                 SatStreet
