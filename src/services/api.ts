@@ -25,9 +25,9 @@ const enhanceProductData = (product: any): Product => {
     // You can add specific product IDs here when you know them
     "default": {
       // These will only be used if the database doesn't have good values
-      name: "Bitcoin Hardware Wallet",
-      description: "Secure cold storage solution for your Bitcoin with advanced encryption and easy backup options. Compatible with all major exchanges and wallet software.",
-      shop: "CryptoSecure"
+      name: "Ledger Nano X Bitcoin Hardware Wallet",
+      description: "The most secure cold storage solution with Bluetooth connectivity. Store, manage and exchange your Bitcoin with peace of mind. Certified CC EAL5+ secure chip.",
+      shop: "BitDefense Solutions"
     }
   };
 
@@ -66,44 +66,64 @@ export const getProducts = async (): Promise<Product[]> => {
     // This will ensure we have good looking product data while developing
     const productTemplates = [
       {
-        name: "Trezor Model T Hardware Wallet",
-        description: "Premium Bitcoin hardware wallet with touchscreen display. Keep your crypto secure with state-of-the-art encryption. Features a built-in password manager and supports over 1,000 cryptocurrencies.",
-        shop: "CryptoVault Store"
+        name: "Trezor Model T Bitcoin Wallet",
+        description: "Premium hardware wallet with color touchscreen display and USB-C. Store Bitcoin and 1,800+ other cryptocurrencies with military-grade security. Includes recovery seed backup cards.",
+        shop: "CryptoVault Direct"
       },
       {
-        name: "Bitcoin Node Kit - Raspberry Pi Edition",
-        description: "Run your own full Bitcoin node with this pre-configured Raspberry Pi kit. Includes 1TB SSD, case, and pre-loaded software. Contribute to network security while verifying your own transactions.",
-        shop: "NodeMasters"
+        name: "Umbrel Home Bitcoin Node",
+        description: "All-in-one Bitcoin & Lightning Network node with 2TB SSD storage. Sync the entire blockchain while maintaining privacy. Includes preconfigured BTCPay Server and Mempool Explorer.",
+        shop: "NodeWorks"
       },
       {
-        name: "Satoshi's Vision T-Shirt",
-        description: "Premium cotton t-shirt featuring the original Bitcoin whitepaper design. Available in multiple sizes with durable screen printing that won't fade after washing.",
-        shop: "Crypto Apparel"
+        name: "COLDCARD Mk4 Secure Bitcoin Wallet",
+        description: "Ultra-secure, air-gapped hardware wallet with physical anti-tampering protections. Includes PIN protection, duress PIN option, and encrypted microSD backup. Made for serious Bitcoin HODLers.",
+        shop: "Coinkite Official"
       },
       {
-        name: "Bitcoin: The Future of Money - Hardcover Book",
-        description: "Best-selling guide to understanding Bitcoin and its revolutionary technology. Written by leading experts with simple explanations of complex concepts. Includes investment strategies and technical insights.",
-        shop: "Crypto Literature"
+        name: "Bitcoin & Lightning Network Engineering Handbook",
+        description: "Comprehensive 450-page guide covering Bitcoin protocol development, Lightning Network implementation, and smart contract security. Includes code examples and practical exercises.",
+        shop: "Chaincode Labs Publishing"
       },
       {
-        name: "Lightning Network Coffee Mug",
-        description: "Ceramic mug featuring Lightning Network design that reveals the network graph when filled with hot liquid. Microwave and dishwasher safe with ergonomic handle.",
-        shop: "BitcoinHome"
+        name: "Blockstream Jade Hardware Wallet",
+        description: "Open-source Bitcoin hardware wallet with color screen and QR scanner. Supports multisignature setups and Liquid assets. Compact form factor with long battery life.",
+        shop: "Blockstream Store"
       },
       {
-        name: "Cold Storage Backup Plates - Stainless Steel",
-        description: "Fire and water resistant stainless steel plates for secure backup of your wallet recovery phrases. Includes punch tool and comes in a tamper-evident package.",
-        shop: "Security Essentials"
+        name: "Strike Lightning Payment Terminal",
+        description: "Accept Bitcoin payments instantly through Lightning Network with zero fees. Includes integrated touchscreen POS system compatible with major accounting software. No chargebacks ever.",
+        shop: "Lightning Solutions"
       },
       {
-        name: "Blockchain Analytics Pro Subscription",
-        description: "Annual subscription to advanced Bitcoin blockchain analysis tools. Track transactions, monitor wallet activity, and generate tax reports with our intuitive dashboard.",
-        shop: "CryptoMetrics"
+        name: "BitBox02 Bitcoin-only Edition",
+        description: "Minimalist Swiss-made hardware wallet with OLED display. Includes invisible touch sensors and secure chip. Designed specifically for Bitcoin with simplified interface.",
+        shop: "Shift Crypto"
       },
       {
-        name: "Mining Rig Cooling System",
-        description: "High-efficiency cooling solution designed specifically for Bitcoin mining hardware. Reduces operating temperature by up to 35% and extends equipment lifespan.",
-        shop: "MiningSupplies"
+        name: "Samourai Wallet Steel Recovery Seed Backup",
+        description: "Fire, water, and corrosion-resistant stainless steel plate for secure BIP39 seed storage. Punch tool included for permanent word recording. Tested to withstand temperatures up to 1,400°C.",
+        shop: "SeedSafe"
+      },
+      {
+        name: "Bitcoin Core Contributor Signature T-Shirt",
+        description: "Limited edition organic cotton t-shirt featuring signatures from top Bitcoin developers. Available in black with subtle orange highlights. All proceeds support open-source development.",
+        shop: "CypherThreads"
+      },
+      {
+        name: "Lightning Network Desk Sculpture",
+        description: "Handcrafted aluminum channel network visualization that lights up via USB power. Each sculpture represents actual Lightning Network topology and is unique. Includes certificate of authenticity.",
+        shop: "Crypto Sculptures"
+      },
+      {
+        name: "Raspiblitz Lightning Node DIY Kit",
+        description: "Complete kit to build your own Bitcoin & Lightning full node with Raspberry Pi 4 (8GB), LCD display, and 1TB SSD. Pre-loaded with Bitcoin Core and LND software.",
+        shop: "DIY Bitcoin Hardware"
+      },
+      {
+        name: "El Salvador Bitcoin Beach Photo Book",
+        description: "Hardcover coffee table book documenting Bitcoin adoption in El Zonte. Features 120 pages of professional photography and interviews with local business owners and community leaders.",
+        shop: "Bitcoin Archive Press"
       }
     ];
 
@@ -236,29 +256,29 @@ export const getProduct = async (id: string): Promise<Product | undefined> => {
     // Realistic product data templates
     const productTemplates = [
       {
-        name: "Trezor Model T Hardware Wallet",
-        description: "Premium Bitcoin hardware wallet with touchscreen display. Keep your crypto secure with state-of-the-art encryption. Features a built-in password manager and supports over 1,000 cryptocurrencies.",
-        shop: "CryptoVault Store"
+        name: "Trezor Model T Bitcoin Wallet",
+        description: "Premium hardware wallet with color touchscreen display and USB-C. Store Bitcoin and 1,800+ other cryptocurrencies with military-grade security. Includes recovery seed backup cards and premium packaging. Compatible with Windows, macOS, Linux and Android devices. Updates automatically with latest security features.",
+        shop: "CryptoVault Direct"
       },
       {
-        name: "Bitcoin Node Kit - Raspberry Pi Edition",
-        description: "Run your own full Bitcoin node with this pre-configured Raspberry Pi kit. Includes 1TB SSD, case, and pre-loaded software. Contribute to network security while verifying your own transactions.",
-        shop: "NodeMasters"
+        name: "Umbrel Home Bitcoin Node",
+        description: "All-in-one Bitcoin & Lightning Network node with 2TB SSD storage. Sync the entire blockchain while maintaining privacy. Includes preconfigured BTCPay Server and Mempool Explorer. Runs on low power consumption with automatic updates. Includes built-in Tor support for enhanced privacy.",
+        shop: "NodeWorks"
       },
       {
-        name: "Satoshi's Vision T-Shirt",
-        description: "Premium cotton t-shirt featuring the original Bitcoin whitepaper design. Available in multiple sizes with durable screen printing that won't fade after washing.",
-        shop: "Crypto Apparel"
+        name: "COLDCARD Mk4 Secure Bitcoin Wallet",
+        description: "Ultra-secure, air-gapped hardware wallet with physical anti-tampering protections. Includes PIN protection, duress PIN option, and encrypted microSD backup. Made for serious Bitcoin HODLers. Features secure element chip and open-source firmware that can be verified before use.",
+        shop: "Coinkite Official"
       },
       {
-        name: "Lightning Network Coffee Mug",
-        description: "Ceramic mug featuring Lightning Network design that reveals the network graph when filled with hot liquid. Microwave and dishwasher safe with ergonomic handle.",
-        shop: "BitcoinHome"
+        name: "Blockstream Jade Hardware Wallet",
+        description: "Open-source Bitcoin hardware wallet with color screen and QR scanner. Supports multisignature setups and Liquid assets. Compact form factor with long battery life. Includes USB-C cable and protective case. Works with popular wallet software like Electrum and Sparrow.",
+        shop: "Blockstream Store"
       },
       {
-        name: "Cold Storage Backup Plates - Stainless Steel",
-        description: "Fire and water resistant stainless steel plates for secure backup of your wallet recovery phrases. Includes punch tool and comes in a tamper-evident package.",
-        shop: "Security Essentials"
+        name: "BitBox02 Bitcoin-only Edition",
+        description: "Minimalist Swiss-made hardware wallet with OLED display. Includes invisible touch sensors and secure chip. Designed specifically for Bitcoin with simplified interface. Features BIP39 passphrase support and microSD slot for backups. Manufactured in Switzerland with strict quality controls.",
+        shop: "Shift Crypto"
       }
     ];
     
