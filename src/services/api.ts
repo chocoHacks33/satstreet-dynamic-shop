@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Product {
@@ -121,7 +120,24 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
 
   if (!error && productImages && productImages.length > 0) {
     console.log('Found product images:', productImages);
-    return productImages.map(img => img.image_path);
+    
+    // Process the image paths to create proper URLs
+    const processedImages = productImages.map(img => {
+      // Check if the image path is already a full URL
+      if (img.image_path.startsWith('http')) {
+        return img.image_path;
+      }
+      
+      // Otherwise, get the public URL from Supabase storage
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(img.image_path);
+      
+      console.log('Generated URL for', img.image_path, ':', data.publicUrl);
+      return data.publicUrl;
+    });
+    
+    return processedImages;
   }
 
   console.log('No product images found, using placeholders');
@@ -206,7 +222,7 @@ export const uploadProductImage = async (file: File, productId: string) => {
   // Save the image reference to the product_images table
   const { error: insertError } = await supabase.from('product_images').insert({
     product_id: productId,
-    image_path: data.publicUrl,
+    image_path: filePath, // Store just the path, not the full URL
     is_primary: false
   });
   

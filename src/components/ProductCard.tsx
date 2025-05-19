@@ -12,6 +12,8 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip';
 import { ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getProductImages } from '@/services/api';
 
 interface ProductCardProps {
   product: Product;
@@ -20,6 +22,23 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addItem } = useCart();
   const navigate = useNavigate();
+  const [productImage, setProductImage] = useState<string>(product.imageUrl);
+  
+  // Try to get a better image from the product_images table
+  useEffect(() => {
+    const loadMainImage = async () => {
+      try {
+        const images = await getProductImages(product.id);
+        if (images && images.length > 0) {
+          setProductImage(images[0]);
+        }
+      } catch (error) {
+        console.error('Failed to load product card image:', error);
+      }
+    };
+    
+    loadMainImage();
+  }, [product.id]);
   
   const handleViewProduct = () => {
     navigate(`/product/${product.id}`);
@@ -47,11 +66,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
     >
       <div className="aspect-square overflow-hidden bg-satstreet-dark/50">
         <img 
-          src={product.imageUrl} 
+          src={productImage} 
           alt={product.name}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
           onError={(e) => {
-            console.error('Product card image failed to load:', product.imageUrl);
+            console.error('Product card image failed to load:', productImage);
             e.currentTarget.src = '/placeholder.svg';
           }}
         />
