@@ -111,10 +111,10 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
   
   // First, let's check if the storage bucket exists
   const { data: buckets } = await supabase.storage.listBuckets();
-  const productImagesBucket = buckets?.find(bucket => bucket.name === 'product-images');
+  const productImagesBucket = buckets?.find(bucket => bucket.name === 'product-images-2');
   
   if (!productImagesBucket) {
-    console.error('Product images bucket not found in storage');
+    console.error('Product images bucket "product-images-2" not found in storage');
     return getPlaceholderImages();
   }
   
@@ -140,7 +140,7 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
         
         // Otherwise, get the public URL from Supabase storage
         const { data } = supabase.storage
-          .from('product-images')
+          .from('product-images-2')
           .getPublicUrl(img.image_path);
         
         const publicUrl = data.publicUrl;
@@ -247,19 +247,18 @@ export const getWalletInfo = async (userId: string) => {
   };
 };
 
-// Helper function for ImageUploader component
 export const uploadProductImage = async (file: File, productId: string) => {
   const fileExt = file.name.split('.').pop();
   const filePath = `${productId}/${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
   
   // Check if the bucket exists, if not try to create it
   const { data: buckets } = await supabase.storage.listBuckets();
-  if (!buckets?.some(bucket => bucket.name === 'product-images')) {
-    console.error('Product-images bucket does not exist in storage. Images cannot be uploaded.');
+  if (!buckets?.some(bucket => bucket.name === 'product-images-2')) {
+    console.error('Product-images-2 bucket does not exist in storage. Images cannot be uploaded.');
   }
   
   const { error: uploadError } = await supabase.storage
-    .from('product-images')
+    .from('product-images-2')
     .upload(filePath, file);
     
   if (uploadError) {
@@ -268,7 +267,7 @@ export const uploadProductImage = async (file: File, productId: string) => {
   }
   
   const { data } = supabase.storage
-    .from('product-images')
+    .from('product-images-2')
     .getPublicUrl(filePath);
     
   // Save the image reference to the product_images table

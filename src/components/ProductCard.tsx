@@ -30,7 +30,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
   useEffect(() => {
     const loadMainImage = async () => {
       try {
+        console.log(`Loading images for product: ${product.id} - ${product.name}`);
         const images = await getProductImages(product.id);
+        console.log('Loaded images for ProductCard:', images);
         if (images && images.length > 0) {
           setProductImage(images[0]);
         }
@@ -62,6 +64,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     : product.description;
 
   const handleImageLoad = () => {
+    console.log('Product card image loaded successfully:', productImage);
     setImageLoaded(true);
     setImageError(false);
   };
