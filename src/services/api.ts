@@ -145,18 +145,18 @@ export const getWalletInfo = async (userId: string) => {
     };
   }
   
-  // Mock transactions for demonstration
+  // Mock transactions for demonstration with proper literal types
   const mockTransactions = [
     {
       id: '1',
-      type: 'deposit',
+      type: 'deposit' as 'deposit',  // Using type assertion to specify literal type
       amount: 50000,
       timestamp: new Date(Date.now() - 86400000).toISOString(),
       description: 'Initial deposit'
     },
     {
       id: '2',
-      type: 'purchase',
+      type: 'purchase' as 'purchase',  // Using type assertion to specify literal type
       amount: -12500,
       timestamp: new Date(Date.now() - 43200000).toISOString(),
       description: 'Purchase of UltraFlex Running Shoes',
@@ -164,7 +164,7 @@ export const getWalletInfo = async (userId: string) => {
     },
     {
       id: '3',
-      type: 'deposit',
+      type: 'deposit' as 'deposit',  // Using type assertion to specify literal type
       amount: 25000,
       timestamp: new Date(Date.now() - 21600000).toISOString(),
       description: 'Lightning payment received'
