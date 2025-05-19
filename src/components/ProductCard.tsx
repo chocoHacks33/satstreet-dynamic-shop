@@ -23,6 +23,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
     addItem(product);
   };
 
+  // Get a truncated version of the description if it's too long
+  const truncatedDescription = product.description && product.description.length > 60 
+    ? `${product.description.substring(0, 60)}...` 
+    : product.description;
+
   return (
     <Card 
       onClick={handleViewProduct}
@@ -39,6 +44,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
       <CardContent className="p-4">
         <div className="text-xs text-muted-foreground">{product.shopName}</div>
         <h3 className="font-medium text-lg mt-1">{product.name}</h3>
+        {truncatedDescription && (
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{truncatedDescription}</p>
+        )}
         <div className="mt-2">
           <PriceIndicator 
             priceInSats={product.priceInSats} 
