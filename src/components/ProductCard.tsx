@@ -23,6 +23,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addItem } = useCart();
   const navigate = useNavigate();
   const [productImage, setProductImage] = useState<string>(product.imageUrl);
+  const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+  const [imageError, setImageError] = useState<boolean>(false);
   
   // Try to get a better image from the product_images table
   useEffect(() => {
@@ -59,6 +61,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
     ? `${product.description.substring(0, 60)}...` 
     : product.description;
 
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    setImageError(false);
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error('Product card image failed to load:', productImage);
+    setImageError(true);
+    // Use a local fallback image
+    e.currentTarget.src = '/placeholder.svg';
+  };
+
   return (
     <Card 
       onClick={handleViewProduct}
@@ -69,10 +83,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
           src={productImage} 
           alt={product.name}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            console.error('Product card image failed to load:', productImage);
-            e.currentTarget.src = '/placeholder.svg';
-          }}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
         />
       </div>
       

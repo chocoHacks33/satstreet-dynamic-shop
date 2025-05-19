@@ -109,6 +109,15 @@ export const getProductById = async (id: string): Promise<Product | null> => {
 export const getProductImages = async (productId: string): Promise<string[]> => {
   console.log('Fetching product images for product ID:', productId);
   
+  // First, let's check if the storage bucket exists
+  const { data: buckets } = await supabase.storage.listBuckets();
+  const productImagesBucket = buckets?.find(bucket => bucket.name === 'product-images');
+  
+  if (!productImagesBucket) {
+    console.error('Product images bucket not found in storage');
+    return getPlaceholderImages();
+  }
+  
   // Check if there are real product images in Supabase
   const { data: productImages, error } = await supabase
     .from('product_images')
@@ -121,32 +130,69 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
   if (!error && productImages && productImages.length > 0) {
     console.log('Found product images:', productImages);
     
-    // Process the image paths to create proper URLs
-    const processedImages = productImages.map(img => {
-      // Check if the image path is already a full URL
-      if (img.image_path.startsWith('http')) {
-        return img.image_path;
-      }
+    try {
+      // Process the image paths to create proper URLs
+      const processedImages = await Promise.all(productImages.map(async (img) => {
+        // Check if the image path is already a full URL
+        if (img.image_path.startsWith('http')) {
+          return img.image_path;
+        }
+        
+        // Otherwise, get the public URL from Supabase storage
+        const { data } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(img.image_path);
+        
+        const publicUrl = data.publicUrl;
+        console.log('Generated URL for', img.image_path, ':', publicUrl);
+        
+        // Verify if the image exists and is accessible
+        try {
+          const response = await fetch(publicUrl, { method: 'HEAD' });
+          if (!response.ok) {
+            console.error(`Image ${publicUrl} is not accessible, status: ${response.status}`);
+            return getRandomPlaceholder();
+          }
+          return publicUrl;
+        } catch (err) {
+          console.error(`Error checking image accessibility for ${publicUrl}:`, err);
+          return getRandomPlaceholder();
+        }
+      }));
       
-      // Otherwise, get the public URL from Supabase storage
-      const { data } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(img.image_path);
-      
-      console.log('Generated URL for', img.image_path, ':', data.publicUrl);
-      return data.publicUrl;
-    });
-    
-    return processedImages;
+      // Filter out any undefined values
+      return processedImages.filter(Boolean) as string[];
+    } catch (err) {
+      console.error('Error processing image URLs:', err);
+      return getPlaceholderImages();
+    }
   }
 
   console.log('No product images found, using placeholders');
-  // Return placeholder images if no real images found
+  return getPlaceholderImages();
+};
+
+// Helper function to get placeholder images
+const getPlaceholderImages = (): string[] => {
   return [
-    `/images/product${Math.floor(Math.random() * 6) + 1}.webp`,
-    `/images/product${Math.floor(Math.random() * 6) + 1}.webp`,
-    `/images/product${Math.floor(Math.random() * 6) + 1}.webp`
+    getRandomPlaceholder(),
+    getRandomPlaceholder(),
+    getRandomPlaceholder()
   ];
+};
+
+// Helper function to get a random placeholder image
+const getRandomPlaceholder = (): string => {
+  const placeholders = [
+    '/images/product1.webp',
+    '/images/product2.webp',
+    '/images/product3.webp',
+    '/images/product4.webp',
+    '/images/product5.webp',
+    '/images/product6.webp',
+    '/placeholder.svg'
+  ];
+  return placeholders[Math.floor(Math.random() * placeholders.length)];
 };
 
 // Helper function for Wallet page
@@ -205,6 +251,12 @@ export const getWalletInfo = async (userId: string) => {
 export const uploadProductImage = async (file: File, productId: string) => {
   const fileExt = file.name.split('.').pop();
   const filePath = `${productId}/${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+  
+  // Check if the bucket exists, if not try to create it
+  const { data: buckets } = await supabase.storage.listBuckets();
+  if (!buckets?.some(bucket => bucket.name === 'product-images')) {
+    console.error('Product-images bucket does not exist in storage. Images cannot be uploaded.');
+  }
   
   const { error: uploadError } = await supabase.storage
     .from('product-images')
