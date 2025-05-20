@@ -1,367 +1,279 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getWalletInfo, getProductById, Product } from '@/services/api';
-import { useRefreshData } from '@/hooks/useRefreshData';
+import { useAuth } from '@/context/AuthContext';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowUp, ArrowDown, ShoppingCart, ExternalLink, Plus } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-
-interface WalletTransactionProps {
-  id: string;
-  type: 'deposit' | 'withdrawal' | 'purchase';
-  amount: number;
-  timestamp: string;
-  description: string;
-  productId?: string;
-}
-
-interface TransactionDetailsProps {
-  transaction: WalletTransactionProps;
-  onClose: () => void;
-}
-
-const TransactionDetails = ({ transaction, onClose }: TransactionDetailsProps) => {
-  const navigate = useNavigate();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchProductDetails = async () => {
-      if (transaction.type === 'purchase' && transaction.productId) {
-        setIsLoading(true);
-        try {
-          const productData = await getProductById(transaction.productId);
-          if (productData) {
-            setProduct(productData);
-          }
-        } catch (error) {
-          console.error('Error fetching product details:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchProductDetails();
-  }, [transaction]);
-
-  const formatSats = (sats: number): string => {
-    return new Intl.NumberFormat('en-US').format(Math.abs(sats));
-  };
-
-  const goToProduct = () => {
-    if (product) {
-      onClose();
-      navigate(`/product/${product.id}`);
-    }
-  };
-
-  return (
-    <DialogContent className="sm:max-w-md">
-      <DialogHeader>
-        <DialogTitle>Transaction Details</DialogTitle>
-        <DialogDescription>
-          {new Date(transaction.timestamp).toLocaleString()}
-        </DialogDescription>
-      </DialogHeader>
-      
-      <div className="space-y-4 py-4">
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Type:</span>
-          <span className="flex items-center">
-            {transaction.type === 'deposit' && <ArrowUp className="w-4 h-4 mr-1 text-green-500" />}
-            {transaction.type === 'withdrawal' && <ArrowDown className="w-4 h-4 mr-1 text-red-500" />}
-            {transaction.type === 'purchase' && <ShoppingCart className="w-4 h-4 mr-1 text-blue-500" />}
-            {transaction.type}
-          </span>
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Amount:</span>
-          <span className={transaction.amount > 0 ? "text-green-500" : "text-red-500"}>
-            {transaction.amount > 0 ? "+" : "-"} {formatSats(transaction.amount)} sats
-          </span>
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Description:</span>
-          <span>{transaction.description}</span>
-        </div>
-        
-        {transaction.type === 'purchase' && transaction.productId && (
-          <div className="mt-4">
-            <h4 className="font-medium mb-2">Product Details:</h4>
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-full" />
-                <Skeleton className="h-5 w-3/4" />
-              </div>
-            ) : product ? (
-              <div className="bg-satstreet-dark p-3 rounded-md">
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0 h-16 w-16 rounded overflow-hidden">
-                    <img 
-                      src={product.imageUrl} 
-                      alt={product.name} 
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h5 className="font-medium">{product.name}</h5>
-                    <p className="text-sm text-muted-foreground">{product.shopName}</p>
-                    <p className="text-sm">{formatSats(product.priceInSats)} sats</p>
-                  </div>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-2 w-full flex items-center"
-                  onClick={goToProduct}
-                >
-                  <ExternalLink className="w-4 h-4 mr-1" />
-                  View Product
-                </Button>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Product no longer available</p>
-            )}
-          </div>
-        )}
-      </div>
-      
-      <DialogFooter>
-        <Button variant="outline" onClick={onClose}>Close</Button>
-      </DialogFooter>
-    </DialogContent>
-  );
-};
-
-const AddFundsDialog = ({ onSuccess }: { onSuccess: () => void }) => {
-  const [amount, setAmount] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleAddFunds = () => {
-    setIsLoading(true);
-    
-    // This is just a mock implementation as we don't have a real payment system
-    setTimeout(() => {
-      toast.success(`Added ${amount} sats to your wallet`);
-      setIsLoading(false);
-      setAmount('');
-      onSuccess();
-    }, 1000);
-  };
-
-  return (
-    <DialogContent className="sm:max-w-md">
-      <DialogHeader>
-        <DialogTitle>Add Funds to Wallet</DialogTitle>
-        <DialogDescription>
-          Enter the amount in sats you want to add to your wallet
-        </DialogDescription>
-      </DialogHeader>
-      
-      <div className="space-y-4 py-4">
-        <div className="space-y-2">
-          <label htmlFor="amount" className="text-sm font-medium">Amount (sats)</label>
-          <Input
-            id="amount"
-            type="number"
-            placeholder="10000"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        </div>
-        
-        <div className="text-sm text-muted-foreground">
-          <p>Note: This is a demo application. No actual funds will be transferred.</p>
-        </div>
-      </div>
-      
-      <DialogFooter>
-        <Button 
-          onClick={handleAddFunds}
-          disabled={!amount || isLoading || parseInt(amount) <= 0}
-          className="bg-bitcoin hover:bg-bitcoin-dark"
-        >
-          {isLoading ? 'Processing...' : 'Add Funds'}
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  );
-};
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Bitcoin, RefreshCw, Copy, ExternalLink, ArrowUpRight, ArrowDownLeft, PlusCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { getWalletInfo, BitcoinTransaction, requestFromFaucet } from '@/services/bitcoinService';
 
 const Wallet = () => {
   const navigate = useNavigate();
-  const [selectedTransaction, setSelectedTransaction] = useState<WalletTransactionProps | null>(null);
-  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
-  const [walletInfo, setWalletInfo] = useState<{
-    balance: number;
-    publicKey: string;
-    transactions: WalletTransactionProps[];
-  }>({
-    balance: 0,
-    publicKey: '',
-    transactions: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user, isAuthenticated, isLoading: authLoading, generateBitcoinAddress } = useAuth();
+  const queryClient = useQueryClient();
+  const [copiedAddress, setCopiedAddress] = useState(false);
+  const [requestingFaucet, setRequestingFaucet] = useState(false);
   
-  const fetchWalletInfo = async () => {
-    setIsLoading(true);
-    try {
-      // Using a mock user ID since we don't have real authentication yet
-      const mockUserId = '1';
-      const walletData = await getWalletInfo(mockUserId);
-      setWalletInfo(walletData);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch wallet info');
-    } finally {
-      setIsLoading(false);
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, authLoading, navigate]);
+  
+  // Query to fetch wallet information
+  const { data: walletInfo, isLoading, error, refetch } = useQuery({
+    queryKey: ['wallet', user?.id],
+    queryFn: () => user ? getWalletInfo(user.id) : null,
+    enabled: !!user,
+    staleTime: 60000, // 1 minute
+  });
+  
+  const handleCopyAddress = () => {
+    if (walletInfo?.address) {
+      navigator.clipboard.writeText(walletInfo.address);
+      setCopiedAddress(true);
+      toast.success('Bitcoin address copied to clipboard');
+      
+      setTimeout(() => setCopiedAddress(false), 3000);
     }
   };
   
-  useEffect(() => {
-    fetchWalletInfo();
-  }, []);
+  const handleGenerateAddress = async () => {
+    const address = await generateBitcoinAddress();
+    if (address) {
+      refetch();
+    }
+  };
   
-  const { 
-    isRefreshing, 
-    formattedTimeUntilRefresh,
-    refreshData
-  } = useRefreshData({ 
-    onRefresh: fetchWalletInfo,
-    intervalMs: 60000 
-  });
-
-  const formatSats = (sats: number): string => {
-    return new Intl.NumberFormat('en-US').format(sats);
+  const handleRequestFaucet = async () => {
+    if (!walletInfo?.address) return;
+    
+    setRequestingFaucet(true);
+    try {
+      const result = await requestFromFaucet(walletInfo.address);
+      
+      if (result.success) {
+        // Refresh wallet data after a delay to simulate transaction confirmation
+        setTimeout(() => {
+          refetch();
+          queryClient.invalidateQueries({ queryKey: ['wallet'] });
+        }, 2000);
+      }
+    } finally {
+      setRequestingFaucet(false);
+    }
   };
-
-  const handleTransactionClick = (transaction: WalletTransactionProps) => {
-    setSelectedTransaction(transaction);
-    setIsTransactionDialogOpen(true);
+  
+  // Format timestamp to readable format
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-
+  
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 flex-grow flex items-center justify-center">
+          <div className="animate-pulse text-lg">Loading wallet...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return null; // Will redirect due to useEffect
+  }
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8 flex-grow">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Wallet</h1>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-bitcoin hover:bg-bitcoin-dark">
-                <Plus className="mr-2 h-4 w-4" /> Add Funds
-              </Button>
-            </DialogTrigger>
-            <AddFundsDialog onSuccess={fetchWalletInfo} />
-          </Dialog>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <h1 className="text-2xl font-bold mb-2 md:mb-0">Bitcoin Testnet Wallet</h1>
+          
+          <Button 
+            onClick={() => refetch()}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw size={14} />
+            <span>Refresh</span>
+          </Button>
         </div>
         
-        {isLoading ? (
-          <>
-            <Skeleton className="h-12 w-full mb-4" />
-            <Skeleton className="h-10 w-full mb-4" />
-            <Skeleton className="h-10 w-full mb-4" />
-            <Skeleton className="h-10 w-full mb-4" />
-          </>
-        ) : error ? (
-          <div className="text-red-500">Error: {error}</div>
-        ) : (
-          <>
-            <div className="bg-satstreet-medium p-6 rounded-lg border border-satstreet-light mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Balance</h2>
-                <div className="text-sm text-muted-foreground flex items-center">
-                  <span>Next update in: {formattedTimeUntilRefresh}</span>
-                  {isRefreshing && <span className="ml-2 animate-spin">⟳</span>}
-                </div>
-              </div>
-              <p className="text-3xl font-bold">{formatSats(walletInfo.balance)} sats</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Public Key: {walletInfo.publicKey}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Balance Card */}
+          <Card className="col-span-1 bg-satstreet-medium border-satstreet-light">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">Your Balance</CardTitle>
+              <CardDescription>Bitcoin testnet wallet</CardDescription>
+            </CardHeader>
             
-            <div className="bg-satstreet-medium p-6 rounded-lg border border-satstreet-light">
-              <h2 className="text-xl font-semibold mb-4">Transactions</h2>
-              {walletInfo.transactions.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-satstreet-light">
-                    <thead>
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          Type
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          Amount
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          Description
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          Timestamp
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-satstreet-light">
-                      {walletInfo.transactions.map((transaction) => (
-                        <tr 
-                          key={transaction.id}
-                          className="hover:bg-satstreet-dark/50 cursor-pointer transition-colors"
-                          onClick={() => handleTransactionClick(transaction)}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-foreground">
-                              {transaction.type === 'deposit' && <ArrowUp className="inline-block w-4 h-4 mr-1 text-green-500" />}
-                              {transaction.type === 'withdrawal' && <ArrowDown className="inline-block w-4 h-4 mr-1 text-red-500" />}
-                              {transaction.type === 'purchase' && <ShoppingCart className="inline-block w-4 h-4 mr-1 text-blue-500" />}
-                              {transaction.type}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-foreground">
-                              {transaction.amount > 0 ? "+" : "-"} {formatSats(Math.abs(transaction.amount))} sats
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-foreground">{transaction.description}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-muted-foreground">
-                              {new Date(transaction.timestamp).toLocaleString()}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            <CardContent>
+              {isLoading ? (
+                <div className="h-24 flex items-center justify-center">
+                  <div className="animate-pulse">Loading balance...</div>
                 </div>
               ) : (
-                <p className="text-muted-foreground">No transactions found.</p>
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Bitcoin className="text-bitcoin" size={24} />
+                      <span className="font-mono font-bold text-2xl text-bitcoin">
+                        {user?.walletBalance?.toLocaleString() || 0}
+                      </span>
+                      <span className="text-muted-foreground">sats</span>
+                    </div>
+                    
+                    <div className="text-muted-foreground text-sm mt-1">
+                      ≈ {walletInfo?.balanceBTC || '0.00000000'} BTC
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-satstreet-light">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm font-medium">Your Bitcoin Address</div>
+                      
+                      {!walletInfo?.address && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleGenerateAddress}
+                          className="h-7 px-2 text-xs"
+                        >
+                          Generate
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {walletInfo?.address ? (
+                      <div className="flex items-center">
+                        <div className="bg-satstreet-dark p-2 rounded text-xs font-mono flex-1 truncate">
+                          {walletInfo.address}
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={handleCopyAddress}
+                          className="ml-1 h-8 w-8 p-0"
+                        >
+                          {copiedAddress ? <span className="text-green-500 text-xs">✓</span> : <Copy size={14} />}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">
+                        No address generated yet
+                      </div>
+                    )}
+                    
+                    <div className="mt-4">
+                      <div className="text-xs text-muted-foreground mb-1">
+                        <span className="font-medium">Network:</span> {walletInfo?.network || 'testnet'}
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRequestFaucet}
+                        disabled={!walletInfo?.address || requestingFaucet}
+                        className="w-full mt-2 bg-bitcoin/10 hover:bg-bitcoin/20 border-bitcoin/20 text-xs"
+                      >
+                        <PlusCircle size={14} className="mr-2" />
+                        {requestingFaucet ? 'Requesting...' : 'Request Testnet Bitcoin from Faucet'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               )}
-            </div>
-          </>
-        )}
+            </CardContent>
+          </Card>
+          
+          {/* Transactions */}
+          <Card className="col-span-1 lg:col-span-2 bg-satstreet-medium border-satstreet-light">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">Transaction History</CardTitle>
+              <CardDescription>Your recent Bitcoin transactions</CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              {isLoading ? (
+                <div className="h-48 flex items-center justify-center">
+                  <div className="animate-pulse">Loading transactions...</div>
+                </div>
+              ) : walletInfo?.transactions && walletInfo.transactions.length > 0 ? (
+                <div className="space-y-1">
+                  {walletInfo.transactions.map((tx: BitcoinTransaction, i: number) => (
+                    <div 
+                      key={tx.txid} 
+                      className="p-3 rounded hover:bg-satstreet-dark/20 transition-colors flex items-center justify-between"
+                    >
+                      <div className="flex items-center">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${tx.type === 'received' ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+                          {tx.type === 'received' ? (
+                            <ArrowDownLeft size={16} className="text-green-500" />
+                          ) : (
+                            <ArrowUpRight size={16} className="text-red-500" />
+                          )}
+                        </div>
+                        
+                        <div className="ml-3">
+                          <div className="text-sm font-medium">
+                            {tx.type === 'received' ? 'Received' : 'Sent'} Bitcoin
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {formatTimestamp(tx.time)}
+                          </div>
+                          <div className="text-xs font-mono mt-1 text-muted-foreground">
+                            {tx.txid.substring(0, 8)}...{tx.txid.substring(tx.txid.length - 8)}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className={`font-mono font-medium ${tx.type === 'received' ? 'text-green-500' : 'text-red-500'}`}>
+                          {tx.type === 'received' ? '+' : '-'}{Math.abs(tx.amount).toLocaleString()} sats
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {tx.confirmations} confirmation{tx.confirmations !== 1 ? 's' : ''}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-48 flex flex-col items-center justify-center">
+                  <Bitcoin size={24} className="text-muted-foreground mb-2" />
+                  <div className="text-muted-foreground">No transactions yet</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Transactions will appear here once you send or receive Bitcoin
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-6 pt-4 border-t border-satstreet-light">
+                <a 
+                  href="https://mempool.space/testnet" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-bitcoin hover:underline flex items-center justify-end"
+                >
+                  <span>View on Testnet Explorer</span>
+                  <ExternalLink size={14} className="ml-1" />
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-      
-      <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
-        {selectedTransaction && (
-          <TransactionDetails 
-            transaction={selectedTransaction}
-            onClose={() => setIsTransactionDialogOpen(false)}
-          />
-        )}
-      </Dialog>
       
       <Footer />
     </div>

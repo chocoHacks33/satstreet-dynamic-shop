@@ -7,48 +7,100 @@ import { useAuth } from '@/context/AuthContext';
 import { useRefreshData } from '@/hooks/useRefreshData';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { toast } from '@/components/ui/use-toast';
-import { Trash2, MinusCircle, PlusCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { Trash2, MinusCircle, PlusCircle, Bitcoin } from 'lucide-react';
+import { createTransaction } from '@/services/bitcoinService';
 
 const Cart = () => {
   const { items, updateQuantity, removeItem, clearCart, totalSats } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, refreshWalletBalance } = useAuth();
   const navigate = useNavigate();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [processingStage, setProcessingStage] = useState<string | null>(null);
   
   // Set up automatic refresh
   const { formattedTimeUntilRefresh } = useRefreshData({});
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!isAuthenticated) {
-      toast({
-        title: 'Login Required',
-        description: 'Please login to complete your purchase',
-        variant: 'destructive',
-      });
+      toast.error('Please login to complete your purchase');
       navigate('/login');
       return;
     }
     
     if (user && user.walletBalance < totalSats) {
-      toast({
-        title: 'Insufficient Balance',
-        description: 'Your wallet balance is too low for this purchase',
-        variant: 'destructive',
-      });
+      toast.error('Your wallet balance is too low for this purchase');
+      return;
+    }
+    
+    if (!items.length) {
+      toast.error('Your cart is empty');
       return;
     }
     
     setIsCheckingOut(true);
     
-    setTimeout(() => {
-      toast({
-        title: 'Purchase Successful!',
-        description: `Thank you for your purchase of ${totalSats.toLocaleString()} sats`,
-      });
+    try {
+      // Process each item as a separate transaction
+      for (const item of items) {
+        setProcessingStage(`Processing payment for ${item.name}...`);
+        
+        // Get the shop's Bitcoin address
+        const { data: shopData, error: shopError } = await supabase
+          .from('seller_shops')
+          .select('public_bitcoin_address, id')
+          .eq('id', item.shopId)
+          .single();
+          
+        if (shopError) {
+          console.error('Error fetching shop data:', shopError);
+          toast.error(`Error processing payment for ${item.name}`);
+          setIsCheckingOut(false);
+          return;
+        }
+        
+        const recipientAddress = shopData.public_bitcoin_address || 'tb1qdefault000000000000000000000000000000000';
+        
+        // Create the Bitcoin transaction
+        const result = await createTransaction(
+          user!.id,
+          item.id,
+          item.priceInSats * item.quantity,
+          shopData.id,
+          recipientAddress
+        );
+        
+        if (!result.success) {
+          toast.error(`Payment failed: ${result.error}`);
+          setIsCheckingOut(false);
+          return;
+        }
+        
+        // If we reach here, transaction was successful
+        setProcessingStage(`Payment confirmed for ${item.name}`);
+      }
+      
+      // All transactions successful
+      setProcessingStage('Finalizing your order...');
+      
+      // Refresh the user's wallet balance
+      await refreshWalletBalance();
+      
+      // Clear the cart
       clearCart();
+      
+      // Show success message
+      toast.success(`Purchase complete! Thank you for your order of ${totalSats.toLocaleString()} sats`);
+      
+      // Navigate back to home
       navigate('/');
-    }, 2000);
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      toast.error('An unexpected error occurred during checkout');
+    } finally {
+      setIsCheckingOut(false);
+      setProcessingStage(null);
+    }
   };
 
   if (items.length === 0) {
@@ -195,12 +247,27 @@ const Cart = () => {
               )}
               
               <Button
-                className="w-full mt-6 bg-bitcoin hover:bg-bitcoin-dark"
+                className="w-full mt-6 bg-bitcoin hover:bg-bitcoin-dark flex items-center justify-center gap-2"
                 disabled={isCheckingOut || (isAuthenticated && (user?.walletBalance || 0) < totalSats)}
                 onClick={handleCheckout}
               >
-                {isCheckingOut ? 'Processing...' : 'Complete Purchase'}
+                {isCheckingOut ? (
+                  <>
+                    <span className="animate-pulse">Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Bitcoin size={18} />
+                    <span>Complete Purchase</span>
+                  </>
+                )}
               </Button>
+              
+              {processingStage && (
+                <div className="text-xs text-center mt-2 text-bitcoin animate-pulse">
+                  {processingStage}
+                </div>
+              )}
               
               {!isAuthenticated && (
                 <p className="text-xs text-center mt-4 text-muted-foreground">

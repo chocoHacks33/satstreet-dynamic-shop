@@ -9,6 +9,7 @@ interface UserProfile {
   username: string;
   email: string;
   walletBalance: number;
+  bitcoinAddress?: string;  // New: Bitcoin testnet address
 }
 
 interface AuthContextType {
@@ -19,6 +20,8 @@ interface AuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  generateBitcoinAddress: () => Promise<string | null>;  // New: Generate Bitcoin address
+  refreshWalletBalance: () => Promise<void>;  // New: Refresh wallet balance
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setTimeout(async () => {
               const { data, error } = await supabase
                 .from('profiles')
-                .select('id, username, email, wallet_balance')
+                .select('id, username, email, wallet_balance, bitcoin_address')
                 .eq('id', newSession.user.id)
                 .single();
               
@@ -52,7 +55,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   id: data.id,
                   username: data.username,
                   email: data.email,
-                  walletBalance: data.wallet_balance
+                  walletBalance: data.wallet_balance,
+                  bitcoinAddress: data.bitcoin_address
                 });
               }
             }, 0);
@@ -76,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (currentSession?.user) {
           const { data, error } = await supabase
             .from('profiles')
-            .select('id, username, email, wallet_balance')
+            .select('id, username, email, wallet_balance, bitcoin_address')
             .eq('id', currentSession.user.id)
             .single();
           
@@ -87,7 +91,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               id: data.id,
               username: data.username,
               email: data.email,
-              walletBalance: data.wallet_balance
+              walletBalance: data.wallet_balance,
+              bitcoinAddress: data.bitcoin_address
             });
           }
         }
@@ -133,6 +138,77 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     }
   };
+  
+  // Generate a Bitcoin testnet address for the user
+  const generateBitcoinAddress = async (): Promise<string | null> => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to generate a Bitcoin address",
+        variant: "destructive"
+      });
+      return null;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Call our edge function to generate an address
+      const { data, error } = await supabase.functions.invoke('bitcoin-service', {
+        body: {
+          action: 'generateAddress',
+          payload: { userId: user.id }
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data?.address) {
+        // Update local user state
+        setUser(prev => prev ? {...prev, bitcoinAddress: data.address} : null);
+        
+        toast({
+          title: "Bitcoin Address Generated",
+          description: "Your testnet Bitcoin address is ready to use",
+        });
+        
+        return data.address;
+      }
+      
+      return null;
+    } catch (e) {
+      console.error("Error generating Bitcoin address:", e);
+      toast({
+        title: "Address Generation Failed",
+        description: e instanceof Error ? e.message : "Could not generate Bitcoin address",
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Refresh the user's wallet balance
+  const refreshWalletBalance = async (): Promise<void> => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('wallet_balance')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      
+      if (data) {
+        setUser(prev => prev ? {...prev, walletBalance: data.wallet_balance} : null);
+      }
+    } catch (e) {
+      console.error("Error refreshing wallet balance:", e);
+    }
+  };
 
   const value = {
     user,
@@ -141,7 +217,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isLoading,
     error,
     login: handleLogin,
-    logout: handleLogout
+    logout: handleLogout,
+    generateBitcoinAddress,
+    refreshWalletBalance
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

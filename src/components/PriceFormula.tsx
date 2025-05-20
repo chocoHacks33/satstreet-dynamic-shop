@@ -12,14 +12,10 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { Zap, AlertCircle, TrendingUp, Timer, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PriceHistoryEntry } from '@/services/api';
+import { getMarketFactors } from '@/services/priceService';
 
 interface PriceFormulaProps {
   currentPrice: number;
@@ -28,13 +24,16 @@ interface PriceFormulaProps {
   onChartPointSelected?: (entry: PriceHistoryEntry) => void;
 }
 
-// Mock coefficients - in a real app these would be retrieved from an ML model
-const mockCoefficients = {
-  alpha: 0.35,
-  beta: 0.25,
-  gamma: 0.15,
-  delta: 0.05
-};
+// Define the interface for market factors
+interface MarketFactors {
+  bitcoinPrice: number;
+  bitcoinVolatility: number;
+  networkDemand: number;
+  marketSentiment: number;
+  seasonalFactor: number;
+  inventoryLevel: number;
+  promotionActive: boolean;
+}
 
 interface PriceComponents {
   basePrice: number;
@@ -50,51 +49,99 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
   productId,
   onChartPointSelected
 }) => {
-  // Calculate mock values for each component of the formula
-  const calculateComponents = (): PriceComponents => {
-    // In a real implementation, these would be actual values from your backend
-    const basePrice = Math.floor(currentPrice * 0.7);
+  // State for market factors
+  const [marketFactors, setMarketFactors] = useState<MarketFactors>({
+    bitcoinPrice: 30000,
+    bitcoinVolatility: 0.3,
+    networkDemand: 0.5,
+    marketSentiment: 0,
+    seasonalFactor: 1.0,
+    inventoryLevel: 50,
+    promotionActive: false
+  });
+  
+  // Fetch market factors on component mount
+  useEffect(() => {
+    const fetchFactors = async () => {
+      const factors = await getMarketFactors();
+      if (factors) {
+        setMarketFactors(factors);
+      }
+    };
     
-    // Generate values that sum up to the remaining price amount
-    const remaining = currentPrice - basePrice;
+    fetchFactors();
+  }, []);
+  
+  // Calculate price components based on market factors
+  const calculateComponents = (): PriceComponents => {
+    // Base price components in satoshis
+    const basePrice = Math.floor(currentPrice * 0.7); // 70% of current price as base
+    
+    // Use market factors to calculate price components
+    const lightningDemand = Math.floor(
+      basePrice * 0.35 * marketFactors.networkDemand
+    );
+    
+    const inventoryLevel = marketFactors.inventoryLevel / 100;
+    const inventoryFactor = Math.floor(
+      basePrice * 0.25 * (1 - inventoryLevel)
+    );
+    
+    const timeEvent = Math.floor(
+      basePrice * 0.15 * (marketFactors.seasonalFactor - 0.8) / 0.4
+    );
+    
+    const loyaltyDiscount = marketFactors.promotionActive ? 
+      Math.floor(basePrice * 0.05) : 
+      Math.floor(basePrice * 0.02);
     
     // Use the explanation to choose which component to emphasize
     const explanation = historyEntry?.explanation || '';
-    
-    let lightningDemand = Math.floor(remaining * mockCoefficients.alpha);
-    let inventoryFactor = Math.floor(remaining * mockCoefficients.beta);
-    let timeEvent = Math.floor(remaining * mockCoefficients.gamma);
-    let loyaltyDiscount = Math.floor(remaining * mockCoefficients.delta);
+    let adjustedLightningDemand = lightningDemand;
+    let adjustedInventoryFactor = inventoryFactor;
+    let adjustedTimeEvent = timeEvent;
     
     // Emphasize different factors based on the explanation
-    if (explanation.includes("demand")) {
-      lightningDemand += 300;
+    if (explanation.includes("demand") || explanation.includes("Lightning")) {
+      adjustedLightningDemand += 300;
     } else if (explanation.includes("inventory") || explanation.includes("supply")) {
-      inventoryFactor += 300;
-    } else if (explanation.includes("event") || explanation.includes("launch")) {
-      timeEvent += 300;
+      adjustedInventoryFactor += 300;
+    } else if (explanation.includes("event") || explanation.includes("season")) {
+      adjustedTimeEvent += 300;
     }
     
     // Ensure total adds up to current price
-    const calculated = basePrice + lightningDemand + inventoryFactor + timeEvent - loyaltyDiscount;
+    const calculated = basePrice + adjustedLightningDemand + adjustedInventoryFactor + adjustedTimeEvent - loyaltyDiscount;
     const diff = currentPrice - calculated;
-    lightningDemand += diff;
+    adjustedLightningDemand += diff;
     
     return {
       basePrice,
-      lightningDemand,
-      inventoryFactor,
-      timeEvent, 
+      lightningDemand: adjustedLightningDemand,
+      inventoryFactor: adjustedInventoryFactor,
+      timeEvent: adjustedTimeEvent,
       loyaltyDiscount
     };
   };
   
   const [components, setComponents] = useState<PriceComponents>(calculateComponents());
   
-  // Update components when price or history entry changes
+  // Update components when price, history entry, or market factors change
   useEffect(() => {
     setComponents(calculateComponents());
-  }, [currentPrice, historyEntry]);
+  }, [currentPrice, historyEntry, marketFactors]);
+  
+  // Calculate the real coefficients based on market factors
+  const getCoefficients = () => {
+    return {
+      alpha: (0.25 + marketFactors.networkDemand * 0.2).toFixed(2),
+      beta: (0.15 + (1 - marketFactors.inventoryLevel / 100) * 0.2).toFixed(2),
+      gamma: (0.10 + (marketFactors.seasonalFactor - 0.8) / 0.4 * 0.1).toFixed(2),
+      delta: marketFactors.promotionActive ? '0.08' : '0.03'
+    };
+  };
+  
+  const coefficients = getCoefficients();
   
   // Animated values
   const animatedBase = useSpring({
@@ -149,7 +196,8 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
                 <p className="font-medium mb-2">How This Price Is Calculated</p>
                 <p className="text-muted-foreground">
                   This breakdown shows you how the current price is determined based on 
-                  market factors like demand, inventory levels, and special promotions.
+                  market factors like Bitcoin price (${marketFactors.bitcoinPrice.toLocaleString()}), 
+                  network demand, inventory levels, and special promotions.
                 </p>
               </div>
             </HoverCardContent>
@@ -192,7 +240,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
                     rel="noopener noreferrer" 
                     className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-bitcoin/30 inline-flex items-center hover:border-bitcoin transition-colors"
                   >
-                    <span className="mr-1 text-xs text-bitcoin">{mockCoefficients.alpha}</span>
+                    <span className="mr-1 text-xs text-bitcoin">{coefficients.alpha}</span>
                     <span className="mr-1">(</span>
                     <animated.div>
                       {animatedLightning.number.to(n => Math.floor(n).toLocaleString())}
@@ -205,6 +253,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
                 <div className="space-y-2">
                   <p>Market demand from Lightning Network activity</p>
+                  <p>Current network demand: {Math.round(marketFactors.networkDemand * 100)}%</p>
                   <p className="text-xs text-muted-foreground">Click to view transactions in new tab</p>
                 </div>
               </TooltipContent>
@@ -216,7 +265,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-blue-500/30 inline-flex items-center">
-                  <span className="mr-1 text-xs text-blue-400">{mockCoefficients.beta}</span>
+                  <span className="mr-1 text-xs text-blue-400">{coefficients.beta}</span>
                   <span className="mr-1">(</span>
                   <animated.div>
                     {animatedInventory.number.to(n => Math.floor(n).toLocaleString())}
@@ -226,7 +275,10 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
-                <p>Supply adjustment based on current inventory levels</p>
+                <div>
+                  <p>Supply adjustment based on current inventory levels</p>
+                  <p>Current inventory: {marketFactors.inventoryLevel}%</p>
+                </div>
               </TooltipContent>
             </Tooltip>
             
@@ -236,7 +288,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-purple-500/30 inline-flex items-center">
-                  <span className="mr-1 text-xs text-purple-400">{mockCoefficients.gamma}</span>
+                  <span className="mr-1 text-xs text-purple-400">{coefficients.gamma}</span>
                   <span className="mr-1">(</span>
                   <animated.div>
                     {animatedTimeEvent.number.to(n => Math.floor(n).toLocaleString())}
@@ -246,7 +298,10 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
-                <p>Seasonal factors and special events that affect pricing</p>
+                <div>
+                  <p>Seasonal factors and special events that affect pricing</p>
+                  <p>Seasonal factor: {marketFactors.seasonalFactor.toFixed(2)}</p>
+                </div>
               </TooltipContent>
             </Tooltip>
             
@@ -256,7 +311,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-red-500/30 inline-flex items-center">
-                  <span className="mr-1 text-xs text-red-400">{mockCoefficients.delta}</span>
+                  <span className="mr-1 text-xs text-red-400">{coefficients.delta}</span>
                   <span className="mr-1">(</span>
                   <animated.div>
                     {animatedDiscount.number.to(n => Math.floor(n).toLocaleString())}
@@ -266,7 +321,10 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-satstreet-dark border-satstreet-light">
-                <p>Available discounts and promotional offers</p>
+                <div>
+                  <p>Available discounts and promotional offers</p>
+                  <p>{marketFactors.promotionActive ? 'Promotion active!' : 'No active promotions'}</p>
+                </div>
               </TooltipContent>
             </Tooltip>
             
@@ -282,11 +340,17 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
           </div>
         </div>
         
+        {/* Bitcoin Price Info */}
+        <div className="mt-3 p-2 bg-satstreet-dark/50 rounded text-xs">
+          <span className="font-medium">Bitcoin Price:</span> 
+          <span className="text-bitcoin ml-1">${marketFactors.bitcoinPrice.toLocaleString()} USD</span>
+        </div>
+        
         {/* Explanation */}
         <div className="mt-4 text-sm text-muted-foreground">
           <p>
             {historyEntry?.explanation || 
-             'Current price is determined by market demand and Bitcoin exchange rate fluctuations.'}
+             `Current price is determined by Bitcoin price ($${marketFactors.bitcoinPrice.toLocaleString()}), network demand (${Math.round(marketFactors.networkDemand * 100)}%), and inventory levels.`}
           </p>
         </div>
       </div>
