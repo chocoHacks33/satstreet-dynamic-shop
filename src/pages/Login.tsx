@@ -1,16 +1,15 @@
-
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Store } from 'lucide-react';
 
 interface LoginForm {
   email: string;
@@ -18,13 +17,19 @@ interface LoginForm {
 }
 
 const Login = () => {
-  const { login, isAuthenticated, isLoading, error } = useAuth();
+  const { login, isAuthenticated, isLoading, error, isSeller } = useAuth();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   // Redirect if already authenticated
   if (isAuthenticated) {
+    // Redirect to seller dashboard if user is a seller
+    if (isSeller) {
+      navigate('/seller');
+      return null;
+    }
+    // Otherwise redirect to home page
     navigate('/');
     return null;
   }
@@ -32,11 +37,10 @@ const Login = () => {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data.email, data.password);
-      toast({
-        title: 'Login Successful',
+      toast.success('Login Successful', {
         description: 'Welcome back to SatStreet!',
       });
-      navigate('/');
+      // Redirect will happen automatically based on the isAuthenticated check
     } catch (err) {
       // Error is handled by the auth context
     }
@@ -46,10 +50,8 @@ const Login = () => {
     setIsGoogleLoading(true);
     // Simulate loading for visual feedback
     setTimeout(() => {
-      toast({
-        title: 'Google Sign In Disabled',
+      toast.error('Google Sign In Disabled', {
         description: 'This feature is currently not available.',
-        variant: 'destructive'
       });
       setIsGoogleLoading(false);
     }, 1000);
@@ -63,7 +65,11 @@ const Login = () => {
         <div className="w-full max-w-md bg-satstreet-medium p-8 rounded-lg border border-satstreet-light shadow-lg">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold mb-2">Welcome to SatStreet</h1>
-            <p className="text-muted-foreground">Login to access your wallet and shop with sats</p>
+            <p className="text-muted-foreground">Login to access your account</p>
+            <div className="flex items-center justify-center mt-2">
+              <Store className="h-5 w-5 text-bitcoin mr-1" />
+              <span className="text-sm text-muted-foreground">Sellers and customers use the same login</span>
+            </div>
           </div>
 
           {error && (
@@ -151,16 +157,29 @@ const Login = () => {
             )}
           </Button>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <Button 
-              variant="link" 
-              className="p-0 h-auto text-bitcoin hover:text-bitcoin-dark"
-              onClick={() => navigate('/register')}
-            >
-              Sign up
-            </Button>
-          </p>
+          <div className="mt-6 space-y-3">
+            <p className="text-center text-sm text-muted-foreground">
+              Don't have an account?{' '}
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-bitcoin hover:text-bitcoin-dark"
+                onClick={() => navigate('/register')}
+              >
+                Sign up
+              </Button>
+            </p>
+            
+            <p className="text-center text-sm text-muted-foreground">
+              Want to become a seller?{' '}
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-bitcoin hover:text-bitcoin-dark"
+                onClick={() => navigate('/seller/register')}
+              >
+                Register as seller
+              </Button>
+            </p>
+          </div>
         </div>
       </div>
       
