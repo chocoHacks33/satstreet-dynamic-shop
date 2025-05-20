@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,9 @@ import {
   ShoppingCart, 
   User,
   Menu,
-  X 
+  X,
+  Store,
+  Package
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,7 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, isSeller } = useAuth();
   const { totalItems } = useCart();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -47,6 +50,11 @@ const Navbar = () => {
 
   const navToHome = () => {
     navigate('/');
+    setMobileMenuOpen(false);
+  };
+  
+  const navToSellerDashboard = () => {
+    navigate('/seller');
     setMobileMenuOpen(false);
   };
 
@@ -89,6 +97,18 @@ const Navbar = () => {
                 <span className="font-mono">{user?.walletBalance.toLocaleString()} sats</span>
               </Button>
               
+              {isSeller && (
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={navToSellerDashboard}
+                  className="text-sm border-bitcoin/30 hover:border-bitcoin hover:bg-satstreet-light flex items-center"
+                >
+                  <Store size={16} className="mr-1" />
+                  <span>Seller Dashboard</span>
+                </Button>
+              )}
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="icon" variant="ghost">
@@ -97,8 +117,12 @@ const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-satstreet-medium border-satstreet-light">
                   <DropdownMenuLabel className="text-center">{user?.username}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground text-center">{user?.role}</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-satstreet-light" />
                   <DropdownMenuItem onClick={navToWallet}>My Wallet</DropdownMenuItem>
+                  {isSeller && (
+                    <DropdownMenuItem onClick={navToSellerDashboard}>Seller Dashboard</DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -188,6 +212,19 @@ const Navbar = () => {
                 <span className="font-mono mr-2">{user?.walletBalance.toLocaleString()} sats</span>
                 My Wallet
               </Button>
+              
+              {isSeller && (
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={navToSellerDashboard}
+                  className="justify-start flex items-center"
+                >
+                  <Store size={16} className="mr-2" />
+                  Seller Dashboard
+                </Button>
+              )}
+              
               <Button 
                 variant="ghost" 
                 size="sm" 

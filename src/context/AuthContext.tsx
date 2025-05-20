@@ -9,6 +9,7 @@ interface UserProfile {
   username: string;
   email: string;
   walletBalance: number;
+  role: string;
 }
 
 interface AuthContextType {
@@ -19,6 +20,8 @@ interface AuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  isSeller: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setTimeout(async () => {
               const { data, error } = await supabase
                 .from('profiles')
-                .select('id, username, email, wallet_balance')
+                .select('id, username, email, wallet_balance, role')
                 .eq('id', newSession.user.id)
                 .single();
               
@@ -52,7 +55,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   id: data.id,
                   username: data.username,
                   email: data.email,
-                  walletBalance: data.wallet_balance
+                  walletBalance: data.wallet_balance,
+                  role: data.role
                 });
               }
             }, 0);
@@ -76,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (currentSession?.user) {
           const { data, error } = await supabase
             .from('profiles')
-            .select('id, username, email, wallet_balance')
+            .select('id, username, email, wallet_balance, role')
             .eq('id', currentSession.user.id)
             .single();
           
@@ -87,7 +91,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               id: data.id,
               username: data.username,
               email: data.email,
-              walletBalance: data.wallet_balance
+              walletBalance: data.wallet_balance,
+              role: data.role
             });
           }
         }
@@ -134,6 +139,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const isSeller = user?.role === 'seller' || user?.role === 'admin';
+  const isAdmin = user?.role === 'admin';
+
   const value = {
     user,
     session,
@@ -141,7 +149,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isLoading,
     error,
     login: handleLogin,
-    logout: handleLogout
+    logout: handleLogout,
+    isSeller,
+    isAdmin
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
