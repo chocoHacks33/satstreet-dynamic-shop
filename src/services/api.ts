@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Product {
@@ -6,6 +7,7 @@ export interface Product {
   description: string;
   priceInSats: number;
   shopName: string;
+  shopId?: string; // Add shopId property
   imageUrl: string;
   priceChangePercentage: number;
   priceHistory: PriceHistoryEntry[];
@@ -51,6 +53,7 @@ export const getProducts = async (): Promise<Product[]> => {
       description: product.description,
       priceInSats: product.price,
       shopName: product.shop_name,
+      shopId: product.shop_id, // Include shop_id 
       imageUrl: `/images/product${(Math.floor(Math.random() * 6) + 1)}.webp`, // Placeholder image
       priceChangePercentage: parseFloat(priceChangePercentage.toFixed(2)),
       priceHistory: (product.price_history || []).map((history: any) => ({

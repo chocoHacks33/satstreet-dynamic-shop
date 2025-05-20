@@ -9,6 +9,70 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bitcoin_transactions: {
+        Row: {
+          amount: number
+          confirmed_at: string | null
+          created_at: string | null
+          id: string
+          product_id: string | null
+          recipient_address: string | null
+          shop_id: string | null
+          status: string
+          tx_hash: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          confirmed_at?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          recipient_address?: string | null
+          shop_id?: string | null
+          status?: string
+          tx_hash: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          confirmed_at?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          recipient_address?: string | null
+          shop_id?: string | null
+          status?: string
+          tx_hash?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bitcoin_transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bitcoin_transactions_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "seller_shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bitcoin_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       price_history: {
         Row: {
           explanation: string | null
@@ -163,6 +227,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bitcoin_address: string | null
           created_at: string
           email: string
           id: string
@@ -172,6 +237,7 @@ export type Database = {
           wallet_balance: number
         }
         Insert: {
+          bitcoin_address?: string | null
           created_at?: string
           email: string
           id: string
@@ -181,6 +247,7 @@ export type Database = {
           wallet_balance?: number
         }
         Update: {
+          bitcoin_address?: string | null
           created_at?: string
           email?: string
           id?: string

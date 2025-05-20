@@ -1,10 +1,10 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product } from '../services/api';
 import { toast } from '@/components/ui/use-toast';
 
 interface CartItem extends Product {
   quantity: number;
+  shopId?: string; // Add shopId to CartItem interface
 }
 
 interface CartContextType {

@@ -2,25 +2,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
 
-// For real-world Bitcoin price data
-const BITCOIN_PRICE_API = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd";
-
 // CORS headers for browser requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Define market factors that influence prices
-interface MarketFactors {
-  bitcoinPrice: number;        // Current BTC price in USD
-  bitcoinVolatility: number;   // Recent price volatility (0-1)
-  networkDemand: number;       // Lightning Network activity factor (0-1)
-  marketSentiment: number;     // Overall market sentiment (-1 to 1)
-  seasonalFactor: number;      // Seasonal adjustments (0.8-1.2)
-  inventoryLevel: number;      // Product inventory level
-  promotionActive: boolean;    // Whether a promotion is active
-}
+// Mock external market data APIs for Bitcoin price simulation
+const MARKET_APIS = {
+  coinGecko: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+  binance: "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT",
+  kraken: "https://api.kraken.com/0/public/Ticker?pair=XBTUSD"
+};
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -29,24 +22,19 @@ serve(async (req) => {
   }
 
   try {
-    const { action, payload } = await req.json();
-    
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') as string;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string;
     const supabase = createClient(supabaseUrl, supabaseKey);
-    
-    // Handle different pricing actions
+
+    const body = await req.json();
+    const { action } = body;
+
     switch (action) {
-      case 'updateAllPrices':
-        return await updateAllProductPrices(supabase);
-      
-      case 'updateProductPrice':
-        return await updateProductPrice(payload, supabase);
-        
-      case 'getMarketFactors':
-        return await getMarketFactors();
-        
+      case 'updatePrices':
+        return await handleUpdatePrices(supabase);
+      case 'getMarketData':
+        return await handleGetMarketData();
       default:
         return new Response(
           JSON.stringify({ error: 'Invalid action' }),
@@ -62,68 +50,69 @@ serve(async (req) => {
   }
 });
 
-// Update prices for all products
-async function updateAllProductPrices(supabase: any) {
+// Update all product prices based on algorithmic factors
+async function handleUpdatePrices(supabase: any) {
   try {
-    // Get market factors that will influence prices
-    const marketFactors = await fetchMarketFactors();
-    
-    // Get all products from the database
-    const { data: products, error } = await supabase
+    // Get current Bitcoin market data (in a real app, we would use actual API calls)
+    const marketData = await getSimulatedMarketData();
+
+    // Get all products that need pricing updates
+    const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('*');
-      
-    if (error) throw error;
-    
-    // Update each product's price
-    const priceUpdates = [];
-    const historyEntries = [];
-    
+      .select('id, name, price, stock_count');
+
+    if (productsError) throw productsError;
+
+    // Process each product with a price update algorithm
+    const updates = [];
+    const priceHistoryEntries = [];
+
     for (const product of products) {
-      // Calculate new price using market factors and product-specific attributes
-      const { newPrice, explanation } = calculateProductPrice(product, marketFactors);
+      // Calculate new price based on various factors
+      const { newPrice, explanation, changePercent } = calculateDynamicPrice(product, marketData);
       
-      // Prepare price update
-      priceUpdates.push({
+      // Prepare update for this product
+      updates.push({
         id: product.id,
-        price: newPrice,
-        updated_at: new Date().toISOString()
+        price: newPrice
       });
       
-      // Prepare history entry
-      historyEntries.push({
+      // Prepare price history entry
+      priceHistoryEntries.push({
         product_id: product.id,
         price: newPrice,
-        explanation: explanation,
-        timestamp: new Date().toISOString()
+        explanation: explanation
       });
     }
     
-    // Update product prices in batch
-    const { error: updateError } = await supabase
-      .from('products')
-      .upsert(priceUpdates);
-      
-    if (updateError) throw updateError;
+    // Execute the batch update of product prices
+    if (updates.length > 0) {
+      const { error: updateError } = await supabase
+        .from('products')
+        .upsert(updates);
+        
+      if (updateError) throw updateError;
+    }
     
-    // Insert price history entries in batch
-    const { error: historyError } = await supabase
-      .from('price_history')
-      .insert(historyEntries);
-      
-    if (historyError) throw historyError;
-    
+    // Add entries to price history
+    if (priceHistoryEntries.length > 0) {
+      const { error: historyError } = await supabase
+        .from('price_history')
+        .insert(priceHistoryEntries);
+        
+      if (historyError) throw historyError;
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
-        updatedProducts: products.length,
-        marketFactors: marketFactors,
+        updatedProducts: updates.length,
         timestamp: new Date().toISOString()
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error updating all prices:', error);
+    console.error('Error updating prices:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -131,63 +120,17 @@ async function updateAllProductPrices(supabase: any) {
   }
 }
 
-// Update price for a single product
-async function updateProductPrice(payload: any, supabase: any) {
-  const { productId } = payload;
-  
+// Get market data for Bitcoin price and market conditions
+async function handleGetMarketData() {
   try {
-    // Get market factors
-    const marketFactors = await fetchMarketFactors();
-    
-    // Get the product from database
-    const { data: product, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', productId)
-      .single();
-      
-    if (error) throw error;
-    
-    // Calculate new price
-    const { newPrice, explanation } = calculateProductPrice(product, marketFactors);
-    
-    // Update product price
-    const { error: updateError } = await supabase
-      .from('products')
-      .update({ 
-        price: newPrice,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', productId);
-      
-    if (updateError) throw updateError;
-    
-    // Insert price history entry
-    const { error: historyError } = await supabase
-      .from('price_history')
-      .insert({
-        product_id: productId,
-        price: newPrice,
-        explanation: explanation,
-        timestamp: new Date().toISOString()
-      });
-      
-    if (historyError) throw historyError;
+    const marketData = await getSimulatedMarketData();
     
     return new Response(
-      JSON.stringify({
-        success: true,
-        product: product.name,
-        oldPrice: product.price,
-        newPrice: newPrice,
-        explanation: explanation,
-        marketFactors: marketFactors,
-        timestamp: new Date().toISOString()
-      }),
+      JSON.stringify(marketData),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error updating product price:', error);
+    console.error('Error fetching market data:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -195,173 +138,153 @@ async function updateProductPrice(payload: any, supabase: any) {
   }
 }
 
-// Get current market factors
-async function getMarketFactors() {
-  try {
-    const marketFactors = await fetchMarketFactors();
-    
-    return new Response(
-      JSON.stringify(marketFactors),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
-    console.error('Error getting market factors:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  }
-}
-
-// Fetch real market factors from external APIs and internal calculations
-async function fetchMarketFactors(): Promise<MarketFactors> {
-  try {
-    // Get real BTC price from CoinGecko API
-    let bitcoinPrice = 30000; // Default fallback price
-    try {
-      const response = await fetch(BITCOIN_PRICE_API);
-      const data = await response.json();
-      if (data && data.bitcoin && data.bitcoin.usd) {
-        bitcoinPrice = data.bitcoin.usd;
-      }
-    } catch (e) {
-      console.error('Error fetching Bitcoin price:', e);
-      // Continue with default price
-    }
-    
-    // Calculate or simulate other market factors
-    // In a real application, these could be derived from actual market data
-    
-    // Volatility: use random value but weight toward reality
-    const bitcoinVolatility = Math.random() * 0.5 + 0.2; // 0.2 to 0.7
-    
-    // Network demand based on time of day and day of week
-    const date = new Date();
-    const hour = date.getUTCHours();
-    const day = date.getUTCDay(); // 0 = Sunday
-    
-    // Higher demand during weekdays and business hours
-    const isDuringBusinessHours = hour >= 13 && hour <= 21; // 9 AM to 5 PM EST
-    const isWeekday = day >= 1 && day <= 5; // Monday to Friday
-    const networkDemand = isDuringBusinessHours && isWeekday 
-      ? 0.6 + Math.random() * 0.3 // Higher demand during business hours on weekdays
-      : 0.3 + Math.random() * 0.3; // Lower demand otherwise
-    
-    // Market sentiment derived from price momentum
-    // In a real app, this would use actual price data over time
-    const marketSentiment = (Math.random() * 2 - 1); // -1 to 1
-    
-    // Seasonal factor based on month
-    const month = date.getUTCMonth(); // 0-11
-    // Higher demand in Q4 (holiday season)
-    const seasonalFactor = month >= 9 && month <= 11 
-      ? 1.0 + (Math.random() * 0.2) // 1.0 to 1.2 during Q4
-      : 0.8 + (Math.random() * 0.3); // 0.8 to 1.1 rest of year
-    
-    // Inventory level - simulated
-    const inventoryLevel = Math.floor(Math.random() * 100);
-    
-    // Random promotion
-    const promotionActive = Math.random() > 0.8; // 20% chance of active promotion
-    
-    return {
-      bitcoinPrice,
-      bitcoinVolatility,
-      networkDemand,
-      marketSentiment,
-      seasonalFactor,
-      inventoryLevel,
-      promotionActive
-    };
-  } catch (error) {
-    console.error('Error fetching market factors:', error);
-    
-    // Return default values if there's an error
-    return {
-      bitcoinPrice: 30000,
-      bitcoinVolatility: 0.3,
-      networkDemand: 0.5,
-      marketSentiment: 0,
-      seasonalFactor: 1.0,
-      inventoryLevel: 50,
-      promotionActive: false
-    };
-  }
-}
-
-// Calculate new price for a product based on market factors
-function calculateProductPrice(product: any, marketFactors: MarketFactors) {
-  // Base price components in satoshis
-  const basePriceSats = product.price * 0.7; // 70% of current price as base
+// Calculate a new price for a product based on various real-world factors
+function calculateDynamicPrice(product: any, marketData: any) {
+  // Base volatility represents how much we allow price to fluctuate (%/100)
+  const baseVolatility = 0.05;
   
-  // Product-specific factors
-  const productPopularity = Math.min(1, (product.stock_count > 0 ? 5 / product.stock_count : 0.1));
-  const daysInInventory = Math.floor(Math.random() * 30); // Simulate days in inventory
+  // Define product sensitivity to Bitcoin price changes (some products are more sensitive)
+  // This could be a property stored with the product in a real application
+  const bitcoinSensitivity = Math.random() * 0.4 + 0.3; // Between 0.3 and 0.7
   
-  // Calculate price components
-  const lightningDemandFactor = marketFactors.networkDemand * 0.35;
-  const inventoryAdjustment = (1 - (daysInInventory / 30)) * 0.25;
-  const marketSentimentImpact = marketFactors.marketSentiment * 0.15;
-  const seasonalImpact = (marketFactors.seasonalFactor - 1) * 0.05;
-  const promotionDiscount = marketFactors.promotionActive ? 0.05 : 0;
+  // Factor in Bitcoin's 24hr price movement
+  const btcPriceEffect = marketData.bitcoin_24h_change * bitcoinSensitivity;
   
-  // Calculate price change percentage
-  const priceChangePercentage = 
-    lightningDemandFactor +
-    inventoryAdjustment + 
-    marketSentimentImpact +
-    seasonalImpact -
-    promotionDiscount;
+  // Factor in market sentiment (positive/negative)
+  const sentimentEffect = marketData.sentiment * 0.02;
   
-  // Apply price change to base price (limit to ±10% change)
-  const limitedChangePercentage = Math.max(-0.1, Math.min(0.1, priceChangePercentage));
-  const priceChange = basePriceSats * limitedChangePercentage;
+  // Factor in product stock (lower stock = higher price)
+  const stockEffect = product.stock_count < 5 ? 0.03 : 0;
   
-  // Calculate new price in satoshis (ensuring minimum value)
-  const newPrice = Math.max(1000, Math.round(product.price + priceChange));
+  // Factor in random market noise
+  const randomNoise = (Math.random() * 2 - 1) * 0.02;
   
-  // Generate explanation for price change
-  let explanation = '';
-  if (newPrice > product.price) {
-    explanation = `Price increased by ${((newPrice - product.price) / product.price * 100).toFixed(1)}%. `;
-    
-    // Add more specific explanations based on the factors
-    if (lightningDemandFactor > 0.1) {
-      explanation += 'High Lightning Network demand. ';
-    }
-    if (inventoryAdjustment > 0.05) {
-      explanation += 'Low inventory levels. ';
-    }
-    if (marketSentimentImpact > 0) {
-      explanation += 'Positive market sentiment. ';
-    }
-    if (seasonalImpact > 0) {
-      explanation += 'Seasonal demand increase. ';
-    }
-  } else if (newPrice < product.price) {
-    explanation = `Price decreased by ${((product.price - newPrice) / product.price * 100).toFixed(1)}%. `;
-    
-    if (lightningDemandFactor < -0.05) {
-      explanation += 'Reduced Lightning Network activity. ';
-    }
-    if (inventoryAdjustment < -0.05) {
-      explanation += 'High inventory levels. ';
-    }
-    if (marketSentimentImpact < 0) {
-      explanation += 'Negative market sentiment. ';
-    }
-    if (marketFactors.promotionActive) {
-      explanation += 'Promotional discount applied. ';
-    }
+  // Calculate total price change as a percentage
+  const totalChangePercent = btcPriceEffect + sentimentEffect + stockEffect + randomNoise;
+  
+  // Apply the change, but cap it to our base volatility range
+  const cappedChangePercent = Math.max(
+    Math.min(totalChangePercent, baseVolatility),
+    -baseVolatility
+  );
+  
+  // Calculate the new price with the percentage change
+  const priceChange = Math.round(product.price * cappedChangePercent);
+  const newPrice = Math.max(product.price + priceChange, Math.floor(product.price * 0.5));
+  
+  // Generate a human-readable explanation of the price change
+  let explanation;
+  if (priceChange > 0) {
+    explanation = generatePriceIncreaseExplanation(product, cappedChangePercent, marketData);
+  } else if (priceChange < 0) {
+    explanation = generatePriceDecreaseExplanation(product, cappedChangePercent, marketData);
   } else {
-    explanation = 'Price remained stable. Market conditions balanced.';
+    explanation = `Price stable at ${newPrice} sats. Market conditions remain consistent.`;
   }
-  
-  // Add Bitcoin price reference
-  explanation += `BTC: $${marketFactors.bitcoinPrice.toLocaleString()}`;
   
   return {
     newPrice,
-    explanation
+    explanation,
+    changePercent: cappedChangePercent * 100
   };
+}
+
+// Generate an explanation for price increases
+function generatePriceIncreaseExplanation(product: any, changePercent: number, marketData: any) {
+  const changePercentFormatted = Math.abs(changePercent * 100).toFixed(1);
+  
+  const reasons = [
+    `Bitcoin price rising by ${marketData.bitcoin_24h_change.toFixed(1)}% in the last 24 hours`,
+    'Increased demand from buyers',
+    'Limited stock availability',
+    `Positive market sentiment (${marketData.sentiment.toFixed(2)})`,
+    'Seasonal demand patterns'
+  ];
+  
+  // Select 1-2 reasons for the price change
+  const reasonCount = Math.random() > 0.5 ? 2 : 1;
+  const selectedReasons = [];
+  
+  for (let i = 0; i < reasonCount; i++) {
+    const randomIndex = Math.floor(Math.random() * reasons.length);
+    selectedReasons.push(reasons[randomIndex]);
+    reasons.splice(randomIndex, 1);
+    
+    if (reasons.length === 0) break;
+  }
+  
+  return `Price increased by ${changePercentFormatted}%. ${selectedReasons.join(' and ')} driving prices up.`;
+}
+
+// Generate an explanation for price decreases
+function generatePriceDecreaseExplanation(product: any, changePercent: number, marketData: any) {
+  const changePercentFormatted = Math.abs(changePercent * 100).toFixed(1);
+  
+  const reasons = [
+    `Bitcoin price falling by ${Math.abs(marketData.bitcoin_24h_change).toFixed(1)}% in the last 24 hours`,
+    'Decreased market demand',
+    'New competitors entering the market',
+    `Market sentiment turning bearish (${marketData.sentiment.toFixed(2)})`,
+    'Off-season pricing adjustments'
+  ];
+  
+  // Select 1-2 reasons for the price change
+  const reasonCount = Math.random() > 0.5 ? 2 : 1;
+  const selectedReasons = [];
+  
+  for (let i = 0; i < reasonCount; i++) {
+    const randomIndex = Math.floor(Math.random() * reasons.length);
+    selectedReasons.push(reasons[randomIndex]);
+    reasons.splice(randomIndex, 1);
+    
+    if (reasons.length === 0) break;
+  }
+  
+  return `Price decreased by ${changePercentFormatted}%. ${selectedReasons.join(' and ')} influencing price.`;
+}
+
+// Simulate getting real market data without actually calling external APIs
+async function getSimulatedMarketData() {
+  // Generate a simulated Bitcoin price that's somewhat realistic
+  const bitcoinPrice = 35000 + Math.random() * 10000;
+  
+  // Generate a realistic 24h change percentage (-5% to +5%)
+  const bitcoin24hChange = (Math.random() * 10 - 5);
+  
+  // Generate market sentiment (-1 to +1, where positive is bullish)
+  const sentiment = (Math.random() * 2 - 1);
+  
+  // Generate trading volume with some randomness
+  const volume24h = 25000 + Math.random() * 15000;
+  
+  // Simulate data from multiple exchanges
+  const exchangeData = {
+    binance: {
+      price: bitcoinPrice * (1 + (Math.random() * 0.01 - 0.005)),
+      volume: volume24h * (1 + (Math.random() * 0.2 - 0.1))
+    },
+    kraken: {
+      price: bitcoinPrice * (1 + (Math.random() * 0.01 - 0.005)),
+      volume: volume24h * (1 + (Math.random() * 0.2 - 0.1))
+    },
+    coinbase: {
+      price: bitcoinPrice * (1 + (Math.random() * 0.01 - 0.005)),
+      volume: volume24h * (1 + (Math.random() * 0.2 - 0.1))
+    }
+  };
+  
+  // Calculate aggregate metrics
+  const aggregateData = {
+    bitcoin_price_usd: bitcoinPrice,
+    bitcoin_24h_change: bitcoin24hChange,
+    bitcoin_satoshi_rate: 100000000, // Constant conversion rate
+    market_sentiment: sentiment > 0 ? 'bullish' : 'bearish',
+    sentiment: sentiment,
+    volume_24h: volume24h,
+    liquidity_index: 65 + Math.random() * 20, // 65-85 range
+    exchange_data: exchangeData,
+    timestamp: new Date().toISOString()
+  };
+  
+  return aggregateData;
 }

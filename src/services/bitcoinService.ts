@@ -112,7 +112,7 @@ export const createTransaction = async (
       success: true, 
       txHash: data.txHash 
     };
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error in createTransaction:', err);
     return { success: false, error: err.message };
   }

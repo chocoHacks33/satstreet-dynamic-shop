@@ -204,7 +204,7 @@ async function handleCreateTransaction(payload: any, supabase: any) {
       
     if (updateError) throw updateError;
     
-    // Record transaction in a new transactions table (would need to be created with a SQL migration)
+    // Record transaction in bitcoin_transactions table
     const { error: txError } = await supabase
       .from('bitcoin_transactions')
       .insert({
@@ -281,7 +281,7 @@ async function handleVerifyTransaction(payload: any, supabase: any) {
         confirmed: txData.status === 'confirmed',
         confirmations: txData.status === 'confirmed' ? 6 : Math.floor(Math.random() * 3),
         block_height: Math.floor(Date.now() / 1000 / 600), // Rough block height estimate
-        time: Math.floor(txData.created_at / 1000)
+        time: Math.floor(new Date(txData.created_at).getTime() / 1000)
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

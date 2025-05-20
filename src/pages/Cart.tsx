@@ -10,6 +10,7 @@ import Footer from '@/components/Footer';
 import { toast } from 'sonner';
 import { Trash2, MinusCircle, PlusCircle, Bitcoin } from 'lucide-react';
 import { createTransaction } from '@/services/bitcoinService';
+import { supabase } from '@/integrations/supabase/client';
 
 const Cart = () => {
   const { items, updateQuantity, removeItem, clearCart, totalSats } = useCart();
@@ -49,7 +50,7 @@ const Cart = () => {
         const { data: shopData, error: shopError } = await supabase
           .from('seller_shops')
           .select('public_bitcoin_address, id')
-          .eq('id', item.shopId)
+          .eq('id', item.shopId || '')
           .single();
           
         if (shopError) {
