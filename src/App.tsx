@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
@@ -12,8 +11,6 @@ import Admin from "./pages/Admin";
 import Wallet from "./pages/Wallet";
 import NotFound from "./pages/NotFound";
 import LightningTransactions from "./pages/LightningTransactions";
-import SellerDashboard from "./pages/SellerDashboard";
-import SellerRegister from "./pages/SellerRegister";
 
 function App() {
   return (
@@ -29,11 +26,9 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/wallet" element={<Wallet />} />
-            <Route path="/lightning/:productId" element={<LightningTransactions />} />
             
-            {/* Seller routes */}
-            <Route path="/seller" element={<SellerDashboard />} />
-            <Route path="/seller/register" element={<SellerRegister />} />
+            {/* New route for Lightning transactions */}
+            <Route path="/lightning/:productId" element={<LightningTransactions />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

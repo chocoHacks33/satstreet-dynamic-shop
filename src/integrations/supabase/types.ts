@@ -41,47 +41,6 @@ export type Database = {
           },
         ]
       }
-      product_declarations: {
-        Row: {
-          blockchain_tx_id: string | null
-          blockchain_tx_status: string | null
-          created_at: string
-          declaration_date: string
-          declared_stock: number
-          id: string
-          product_id: string
-          updated_at: string
-        }
-        Insert: {
-          blockchain_tx_id?: string | null
-          blockchain_tx_status?: string | null
-          created_at?: string
-          declaration_date?: string
-          declared_stock: number
-          id?: string
-          product_id: string
-          updated_at?: string
-        }
-        Update: {
-          blockchain_tx_id?: string | null
-          blockchain_tx_status?: string | null
-          created_at?: string
-          declaration_date?: string
-          declared_stock?: number
-          id?: string
-          product_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_declarations_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       product_images: {
         Row: {
           created_at: string
@@ -124,7 +83,6 @@ export type Database = {
           id: string
           name: string
           price: number
-          shop_id: string | null
           shop_name: string
           stock_count: number
           updated_at: string
@@ -135,7 +93,6 @@ export type Database = {
           id?: string
           name: string
           price: number
-          shop_id?: string | null
           shop_name: string
           stock_count?: number
           updated_at?: string
@@ -146,27 +103,17 @@ export type Database = {
           id?: string
           name?: string
           price?: number
-          shop_id?: string | null
           shop_name?: string
           stock_count?: number
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "seller_shops"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
           created_at: string
           email: string
           id: string
-          role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           username: string | null
           wallet_balance: number
@@ -175,7 +122,6 @@ export type Database = {
           created_at?: string
           email: string
           id: string
-          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           username?: string | null
           wallet_balance?: number
@@ -184,50 +130,11 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           username?: string | null
           wallet_balance?: number
         }
         Relationships: []
-      }
-      seller_shops: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          owner_id: string
-          public_bitcoin_address: string | null
-          shop_name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          owner_id: string
-          public_bitcoin_address?: string | null
-          shop_name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          owner_id?: string
-          public_bitcoin_address?: string | null
-          shop_name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "seller_shops_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {
@@ -244,7 +151,7 @@ export type Database = {
       }
     }
     Enums: {
-      user_role: "customer" | "seller" | "admin"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -359,8 +266,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      user_role: ["customer", "seller", "admin"],
-    },
+    Enums: {},
   },
 } as const
