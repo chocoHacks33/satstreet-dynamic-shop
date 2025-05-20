@@ -37,7 +37,12 @@ const Navbar = () => {
             to="/"
             className="text-2xl font-bold text-white flex items-center"
           >
-            <span className="text-bitcoin">Sat</span>Street
+            <img 
+              src="/logo-satstreet.png" 
+              alt="SatStreet Logo" 
+              className="h-8 mr-2" 
+            />
+            <span><span className="text-bitcoin">Sat</span>Street</span>
           </Link>
         </div>
 
