@@ -12,6 +12,7 @@ import Footer from '@/components/Footer';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Store } from 'lucide-react';
 import { updateUserRole } from '@/services/api';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RegisterForm {
   email: string;

@@ -31,7 +31,7 @@ function App() {
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/lightning/:productId" element={<LightningTransactions />} />
             
-            {/* New routes for seller functionality */}
+            {/* Seller routes */}
             <Route path="/seller" element={<SellerDashboard />} />
             <Route path="/seller/register" element={<SellerRegister />} />
             

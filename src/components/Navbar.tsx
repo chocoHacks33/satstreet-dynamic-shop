@@ -1,252 +1,133 @@
 
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
-import { useCart } from '@/context/CartContext';
-import SearchBar from './SearchBar';
-import { 
-  ShoppingCart, 
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
+import { useAuth } from "@/context/AuthContext";
+import {
+  Home,
   User,
-  Menu,
-  X,
+  ShoppingCart,
+  Wallet,
+  LogOut,
+  ChevronDown,
   Store,
-  Package
-} from 'lucide-react';
+} from "lucide-react";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
-  const { isAuthenticated, user, logout, isSeller } = useAuth();
-  const { totalItems } = useCart();
+  const { user, isAuthenticated, logout, isSeller } = useAuth();
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  const handleSearch = (query: string) => {
-    navigate(`/?search=${encodeURIComponent(query)}`);
-    setMobileMenuOpen(false);
-  };
-  
-  const navToWallet = () => {
-    navigate('/wallet');
-    setMobileMenuOpen(false);
-  };
 
-  const navToCart = () => {
-    navigate('/cart');
-    setMobileMenuOpen(false);
-  };
-  
-  const navToLogin = () => {
-    navigate('/login');
-    setMobileMenuOpen(false);
-  };
-
-  const navToHome = () => {
-    navigate('/');
-    setMobileMenuOpen(false);
-  };
-  
-  const navToSellerDashboard = () => {
-    navigate('/seller');
-    setMobileMenuOpen(false);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
   };
 
   return (
-    <nav className="bg-satstreet-dark py-4 px-4 md:px-8 border-b border-satstreet-medium">
-      <div className="container mx-auto flex justify-between items-center">
-        {/* Logo - always visible */}
-        <Link to="/" className="flex items-center">
-          <div className="bg-satstreet-dark rounded-full p-1 flex items-center justify-center">
-            <img 
-              src="https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2//satstreet_logo_vector.svg" 
-              alt="SatStreet" 
-              className="h-12 w-auto mr-3"
-            />
-          </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bitcoin-gradient">
-            SatStreet
-          </span>
-        </Link>
+    <nav className="bg-satstreet-dark py-4">
+      <div className="container mx-auto px-4 flex flex-wrap items-center justify-between">
+        <div className="flex items-center">
+          <Link
+            to="/"
+            className="text-2xl font-bold text-white flex items-center"
+          >
+            <span className="text-bitcoin">Sat</span>Street
+          </Link>
+        </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-6 flex-grow justify-end">
-          <div className="flex-grow max-w-md">
-            <SearchBar onSearch={handleSearch} />
-          </div>
+        <div className="flex space-x-2 sm:space-x-4 items-center mt-4 sm:mt-0">
+          <Link to="/" className="text-white hover:text-gray-300">
+            <Home className="w-5 h-5 sm:mr-1 sm:inline-block" />
+            <span className="hidden sm:inline-block">Home</span>
+          </Link>
           
+          <Link to="/cart" className="text-white hover:text-gray-300 ml-4">
+            <ShoppingCart className="w-5 h-5 sm:mr-1 sm:inline-block" />
+            <span className="hidden sm:inline-block">Cart</span>
+          </Link>
+
           {isAuthenticated ? (
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={navToWallet}
-                className="text-sm border-bitcoin/30 hover:border-bitcoin hover:bg-satstreet-light"
-              >
-                <span className="font-mono">{user?.walletBalance.toLocaleString()} sats</span>
-              </Button>
-              
+            <>
+              <Link to="/wallet" className="text-white hover:text-gray-300 ml-4">
+                <Wallet className="w-5 h-5 sm:mr-1 sm:inline-block" />
+                <span className="hidden sm:inline-block">Wallet</span>
+              </Link>
+
               {isSeller && (
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  onClick={navToSellerDashboard}
-                  className="text-sm border-bitcoin/30 hover:border-bitcoin hover:bg-satstreet-light flex items-center"
-                >
-                  <Store size={16} className="mr-1" />
-                  <span>Seller Dashboard</span>
-                </Button>
+                <Link to="/seller" className="text-white hover:text-gray-300 ml-4">
+                  <Store className="w-5 h-5 sm:mr-1 sm:inline-block" />
+                  <span className="hidden sm:inline-block">Seller Dashboard</span>
+                </Link>
               )}
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost">
-                    <User />
-                  </Button>
+                  <button className="text-white hover:text-gray-300 flex items-center ml-4">
+                    <User className="w-5 h-5 sm:mr-1" />
+                    <span className="hidden sm:inline-block">{user?.username || 'Account'}</span>
+                    <ChevronDown className="w-4 h-4 ml-1" />
+                  </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-satstreet-medium border-satstreet-light">
-                  <DropdownMenuLabel className="text-center">{user?.username}</DropdownMenuLabel>
-                  <DropdownMenuLabel className="text-xs text-muted-foreground text-center">{user?.role}</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-satstreet-light" />
-                  <DropdownMenuItem onClick={navToWallet}>My Wallet</DropdownMenuItem>
-                  {isSeller && (
-                    <DropdownMenuItem onClick={navToSellerDashboard}>Seller Dashboard</DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem disabled>
+                      <div className="flex flex-col">
+                        <span>Signed in as</span>
+                        <span className="font-medium">{user?.username || user?.email}</span>
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => navigate("/wallet")}>
+                      <Wallet className="mr-2 h-4 w-4" />
+                      <span>Wallet</span>
+                    </DropdownMenuItem>
+
+                    {!isSeller && (
+                      <DropdownMenuItem onSelect={() => navigate("/seller/register")}>
+                        <Store className="mr-2 h-4 w-4" />
+                        <span>Become a Seller</span>
+                      </DropdownMenuItem>
+                    )}
+
+                    {isSeller && (
+                      <DropdownMenuItem onSelect={() => navigate("/seller")}>
+                        <Store className="mr-2 h-4 w-4" />
+                        <span>Seller Dashboard</span>
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-              
-              <Button 
-                onClick={navToCart} 
-                size="icon" 
-                variant="ghost" 
-                className="relative"
-              >
-                <ShoppingCart />
-                {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-bitcoin text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
-              </Button>
-            </div>
+            </>
           ) : (
-            <div className="flex items-center space-x-4">
-              <Button 
-                onClick={navToLogin} 
-                variant="default"
-                className="bg-bitcoin hover:bg-bitcoin-dark"
+            <div className="flex ml-4">
+              <Button
+                variant="outline"
+                className="mr-2 border-gray-600 text-white hover:text-white hover:bg-satstreet-medium"
+                onClick={() => navigate("/login")}
               >
                 Login
               </Button>
-              <Button 
-                onClick={navToCart} 
-                size="icon" 
-                variant="ghost" 
-                className="relative"
-              >
-                <ShoppingCart />
-                {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-bitcoin text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
+              <Button className="bg-bitcoin hover:bg-bitcoin-dark text-white" 
+                onClick={() => navigate("/register")}>
+                Sign up
               </Button>
             </div>
           )}
-        </div>
-
-        {/* Mobile menu button */}
-        <div className="md:hidden flex items-center">
-          {/* Cart icon always visible on mobile */}
-          <Button 
-            onClick={navToCart}
-            size="icon" 
-            variant="ghost"
-            className="relative mr-2"
-          >
-            <ShoppingCart />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-bitcoin text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {totalItems}
-              </span>
-            )}
-          </Button>
-
-          <Button
-            size="icon"
-            variant="ghost" 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X /> : <Menu />}
-          </Button>
         </div>
       </div>
-
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden mt-4 pt-4 border-t border-satstreet-light">
-          <div className="px-4 py-2">
-            <SearchBar onSearch={handleSearch} />
-          </div>
-          
-          {isAuthenticated ? (
-            <div className="flex flex-col space-y-2 px-4 py-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={navToWallet}
-                className="justify-start"
-              >
-                <span className="font-mono mr-2">{user?.walletBalance.toLocaleString()} sats</span>
-                My Wallet
-              </Button>
-              
-              {isSeller && (
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  onClick={navToSellerDashboard}
-                  className="justify-start flex items-center"
-                >
-                  <Store size={16} className="mr-2" />
-                  Seller Dashboard
-                </Button>
-              )}
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleLogout}
-                className="justify-start"
-              >
-                Logout
-              </Button>
-            </div>
-          ) : (
-            <div className="px-4 py-2">
-              <Button 
-                onClick={navToLogin} 
-                variant="default" 
-                className="w-full bg-bitcoin hover:bg-bitcoin-dark"
-              >
-                Login
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
     </nav>
   );
 };

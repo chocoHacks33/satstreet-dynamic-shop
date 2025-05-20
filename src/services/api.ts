@@ -134,9 +134,6 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
     // Use hard-coded valid image URLs that will work for the demo
     const publicPath = 'https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2/';
     
-    // Log the supabase URL for verification (not using projectRef which doesn't exist)
-    console.log('Using Supabase URL:', supabase.supabaseUrl);
-    
     // Process the image paths to create proper URLs
     const processedImages = productImages.map(img => {
       // If the image path is already a full URL, use it
@@ -296,9 +293,17 @@ export interface ProductDeclaration {
 }
 
 export const createShop = async (shop: Omit<Shop, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>): Promise<Shop | null> => {
+  // We need to get the current user's ID to set as owner_id
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  
   const { data, error } = await supabase
     .from('seller_shops')
     .insert({
+      owner_id: user.id,
       shop_name: shop.shopName,
       description: shop.description,
       public_bitcoin_address: shop.publicBitcoinAddress
