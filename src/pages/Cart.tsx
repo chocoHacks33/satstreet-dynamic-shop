@@ -52,21 +52,21 @@ const Cart = () => {
           .eq('id', item.shopId || '')
           .single();
           
-        if (shopError) {
+        if (shopError || !shopData) {
           console.error('Error fetching shop data:', shopError);
           toast.error(`Error processing payment for ${item.name}`);
           setIsCheckingOut(false);
           return;
         }
         
-        const recipientAddress = shopData?.public_xrp_address || 'rDefaultXRP000000000000000000000000';
+        const recipientAddress = shopData.public_xrp_address || 'rDefaultXRP000000000000000000000000';
         
         // Create the XRP transaction
         const result = await createTransaction(
           user!.id,
           item.id,
           item.priceInXrp * item.quantity,
-          shopData?.id || '',
+          shopData.id,
           recipientAddress
         );
         
@@ -110,11 +110,11 @@ const Cart = () => {
         <div className="container mx-auto px-4 py-16 flex-grow flex flex-col items-center justify-center">
           <h1 className="text-2xl font-bold mb-4">Your Cart is Empty</h1>
           <p className="text-muted-foreground mb-8">
-            Add some awesome Bitcoin products to get started
+            Add some awesome XRP products to get started
           </p>
           <Button 
             onClick={() => navigate('/')}
-            className="bg-bitcoin hover:bg-bitcoin-dark"
+            className="bg-primary hover:bg-primary/90"
           >
             Continue Shopping
           </Button>
