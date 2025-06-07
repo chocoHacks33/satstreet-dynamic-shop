@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PriceIndicator from './PriceIndicator';
@@ -103,7 +102,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         )}
         <div className="mt-2">
           <PriceIndicator 
-            priceInSats={product.priceInSats} 
+            priceInXrp={product.priceInXrp} 
             priceChangePercentage={product.priceChangePercentage}
           />
         </div>

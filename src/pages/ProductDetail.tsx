@@ -205,7 +205,7 @@ const ProductDetail = () => {
     (product.priceHistory.length > 0 ? product.priceHistory[product.priceHistory.length - 1] : undefined);
   
   // Display price from selected entry or current price
-  const displayedPrice = selectedPriceEntry ? selectedPriceEntry.price : product.priceInSats;
+  const displayedPrice = selectedPriceEntry ? selectedPriceEntry.price : product.priceInXrp;
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -288,7 +288,7 @@ const ProductDetail = () => {
             
             <div className="mb-6">
               <PriceIndicator 
-                priceInSats={product.priceInSats} 
+                priceInXrp={product.priceInXrp} 
                 priceChangePercentage={product.priceChangePercentage}
                 size="lg"
               />
@@ -390,7 +390,7 @@ const ProductDetail = () => {
               size="lg"
               className="w-full bg-bitcoin hover:bg-bitcoin-dark"
             >
-              Add to Cart ({product.priceInSats.toLocaleString()} sats)
+              Add to Cart ({product.priceInXrp.toLocaleString()} XRP)
             </Button>
           </div>
         </div>

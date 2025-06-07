@@ -59,14 +59,14 @@ const Cart = () => {
           return;
         }
         
-        const recipientAddress = shopData.public_xrp_address || 'rDefaultXRP000000000000000000000000';
+        const recipientAddress = shopData?.public_xrp_address || 'rDefaultXRP000000000000000000000000';
         
         // Create the XRP transaction
         const result = await createTransaction(
           user!.id,
           item.id,
           item.priceInXrp * item.quantity,
-          shopData.id,
+          shopData?.id || '',
           recipientAddress
         );
         
