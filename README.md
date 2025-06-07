@@ -1,10 +1,11 @@
-# SatStreet
 
-SatStreet is a demand-driven, transparent, open-source marketplace where prices move with real interest — not manufactured hype.
+# xStreet
 
-## Why SatStreet?
+xStreet is a demand-driven, transparent, open-source marketplace where prices move with real interest — not manufactured hype.
 
-Most marketplaces rely on artificial urgency: fake discounts, countdown timers, and inflated pricing games. SatStreet flips the model.
+## Why xStreet?
+
+Most marketplaces rely on artificial urgency: fake discounts, countdown timers, and inflated pricing games. xStreet flips the model.
 
 - Prices go up based on real engagement (views, carts, wishlists, purchases)
 - Every price change is logged, explained, and open to the public
@@ -17,7 +18,7 @@ No hype. Just signal.
 
 - Dynamic Pricing Engine — prices adjust with buyer demand
 - AI Explanation Module — human-readable summaries of why prices changed
-- Price Timeline — trackable, transparent history of every product’s evolution
+- Price Timeline — trackable, transparent history of every product's evolution
 - Blockchain Anchoring — demand snapshots hashed and verifiable
 - External Signal Hooks — ready for Google Trends, Reddit, and more
 - Fully Simulated Demand Layer — cart/wishlist/view logic without external data
@@ -27,3 +28,4 @@ No hype. Just signal.
 1. Install dependencies:
    ```bash
    bun install
+   ```

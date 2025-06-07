@@ -2,13 +2,13 @@
 import { ArrowUp, ArrowDown } from 'lucide-react';
 
 interface PriceIndicatorProps {
-  priceInSats: number;
+  priceInXrp: number;
   priceChangePercentage: number;
   size?: 'sm' | 'md' | 'lg';
 }
 
 const PriceIndicator = ({ 
-  priceInSats, 
+  priceInXrp, 
   priceChangePercentage, 
   size = 'md' 
 }: PriceIndicatorProps) => {
@@ -40,7 +40,7 @@ const PriceIndicator = ({
   return (
     <div className={`flex items-center ${getColorIntensity()} ${isPositive ? 'animate-price-pulse-up' : 'animate-price-pulse-down'}`}>
       <span className={`font-mono font-medium ${textSizeClasses}`}>
-        {priceInSats.toLocaleString()} sats
+        {priceInXrp.toFixed(2)} XRP
       </span>
       <div className="flex items-center ml-2">
         <Arrow size={iconSize} className="mr-1" />

@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 
 interface CartItem extends Product {
   quantity: number;
-  shopId?: string; // Add shopId to CartItem interface
+  shopId?: string;
 }
 
 interface CartContextType {
@@ -14,7 +14,7 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
-  totalSats: number;
+  totalXrp: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -24,7 +24,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('satstreet_cart');
+    const savedCart = localStorage.getItem('xstreet_cart');
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
@@ -37,7 +37,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   // Save cart to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem('satstreet_cart', JSON.stringify(items));
+    localStorage.setItem('xstreet_cart', JSON.stringify(items));
   }, [items]);
 
   const addItem = (product: Product) => {
@@ -99,8 +99,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   
-  const totalSats = items.reduce(
-    (total, item) => total + item.priceInSats * item.quantity, 
+  const totalXrp = items.reduce(
+    (total, item) => total + item.priceInXrp * item.quantity, 
     0
   );
 
@@ -111,7 +111,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     updateQuantity,
     clearCart,
     totalItems,
-    totalSats
+    totalXrp
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
