@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,12 +8,12 @@ import { useRefreshData } from '@/hooks/useRefreshData';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
-import { Trash2, MinusCircle, PlusCircle } from 'lucide-react';
-import { createTransaction } from '@/services/xrpService';
+import { Trash2, MinusCircle, PlusCircle, Bitcoin } from 'lucide-react';
+import { createTransaction } from '@/services/bitcoinService';
 import { supabase } from '@/integrations/supabase/client';
 
 const Cart = () => {
-  const { items, updateQuantity, removeItem, clearCart, totalXrp } = useCart();
+  const { items, updateQuantity, removeItem, clearCart, totalSats } = useCart();
   const { isAuthenticated, user, refreshWalletBalance } = useAuth();
   const navigate = useNavigate();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -28,7 +29,7 @@ const Cart = () => {
       return;
     }
     
-    if (user && user.walletBalance < totalXrp) {
+    if (user && user.walletBalance < totalSats) {
       toast.error('Your wallet balance is too low for this purchase');
       return;
     }
@@ -45,27 +46,27 @@ const Cart = () => {
       for (const item of items) {
         setProcessingStage(`Processing payment for ${item.name}...`);
         
-        // Get the shop's XRP address
+        // Get the shop's Bitcoin address
         const { data: shopData, error: shopError } = await supabase
           .from('seller_shops')
-          .select('public_xrp_address, id')
+          .select('public_bitcoin_address, id')
           .eq('id', item.shopId || '')
           .single();
           
-        if (shopError || !shopData) {
+        if (shopError) {
           console.error('Error fetching shop data:', shopError);
           toast.error(`Error processing payment for ${item.name}`);
           setIsCheckingOut(false);
           return;
         }
         
-        const recipientAddress = shopData.public_xrp_address || 'rDefaultXRP000000000000000000000000';
+        const recipientAddress = shopData.public_bitcoin_address || 'tb1qdefault000000000000000000000000000000000';
         
-        // Create the XRP transaction
+        // Create the Bitcoin transaction
         const result = await createTransaction(
           user!.id,
           item.id,
-          item.priceInXrp * item.quantity,
+          item.priceInSats * item.quantity,
           shopData.id,
           recipientAddress
         );
@@ -90,7 +91,7 @@ const Cart = () => {
       clearCart();
       
       // Show success message
-      toast.success(`Purchase complete! Thank you for your order of ${totalXrp.toFixed(2)} XRP`);
+      toast.success(`Purchase complete! Thank you for your order of ${totalSats.toLocaleString()} sats`);
       
       // Navigate back to home
       navigate('/');
@@ -110,11 +111,11 @@ const Cart = () => {
         <div className="container mx-auto px-4 py-16 flex-grow flex flex-col items-center justify-center">
           <h1 className="text-2xl font-bold mb-4">Your Cart is Empty</h1>
           <p className="text-muted-foreground mb-8">
-            Add some awesome XRP products to get started
+            Add some awesome Bitcoin products to get started
           </p>
           <Button 
             onClick={() => navigate('/')}
-            className="bg-primary hover:bg-primary/90"
+            className="bg-bitcoin hover:bg-bitcoin-dark"
           >
             Continue Shopping
           </Button>
@@ -142,8 +143,8 @@ const Cart = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2">
-            <div className="bg-xstreet-medium rounded-lg border border-xstreet-light overflow-hidden">
-              <div className="divide-y divide-xstreet-light">
+            <div className="bg-satstreet-medium rounded-lg border border-satstreet-light overflow-hidden">
+              <div className="divide-y divide-satstreet-light">
                 {items.map((item) => (
                   <div key={item.id} className="p-4 flex items-center">
                     {/* Product image */}
@@ -156,7 +157,6 @@ const Cart = () => {
                     </div>
                     
                     {/* Product details */}
-                    
                     <div className="ml-4 flex flex-1 flex-col">
                       <div className="flex justify-between">
                         <div>
@@ -164,7 +164,7 @@ const Cart = () => {
                           <p className="text-sm text-muted-foreground">{item.shopName}</p>
                         </div>
                         <p className="font-mono font-medium">
-                          {item.priceInXrp.toFixed(2)} XRP
+                          {item.priceInSats.toLocaleString()} sats
                         </p>
                       </div>
                       
@@ -203,7 +203,7 @@ const Cart = () => {
           
           {/* Order Summary */}
           <div>
-            <div className="bg-xstreet-medium rounded-lg border border-xstreet-light p-6">
+            <div className="bg-satstreet-medium rounded-lg border border-satstreet-light p-6">
               <h2 className="text-lg font-medium mb-4">Order Summary</h2>
               
               <div className="space-y-3">
@@ -211,17 +211,17 @@ const Cart = () => {
                   <div key={item.id} className="flex justify-between text-sm">
                     <span>{item.name} x {item.quantity}</span>
                     <span className="font-mono">
-                      {(item.priceInXrp * item.quantity).toFixed(2)} XRP
+                      {(item.priceInSats * item.quantity).toLocaleString()} sats
                     </span>
                   </div>
                 ))}
               </div>
               
-              <div className="border-t border-xstreet-light my-4 pt-4">
+              <div className="border-t border-satstreet-light my-4 pt-4">
                 <div className="flex justify-between font-medium">
                   <span>Total</span>
-                  <span className="font-mono text-primary">
-                    {totalXrp.toFixed(2)} XRP
+                  <span className="font-mono text-bitcoin">
+                    {totalSats.toLocaleString()} sats
                   </span>
                 </div>
                 
@@ -231,25 +231,25 @@ const Cart = () => {
               </div>
               
               {isAuthenticated && (
-                <div className="mt-2 p-3 bg-xstreet-light rounded text-sm">
+                <div className="mt-2 p-3 rounded bg-satstreet-light text-sm">
                   <div className="flex justify-between mb-1">
                     <span>Your wallet balance:</span>
                     <span className="font-mono">
-                      {(user?.walletBalance / 1000000).toFixed(2) || 0} XRP
+                      {user?.walletBalance.toLocaleString() || 0} sats
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Balance after purchase:</span>
-                    <span className={`font-mono ${(user?.walletBalance || 0) < totalXrp * 1000000 ? 'text-red-500' : 'text-green-500'}`}>
-                      {((user?.walletBalance || 0) / 1000000 - totalXrp).toFixed(2)} XRP
+                    <span className={`font-mono ${(user?.walletBalance || 0) < totalSats ? 'text-red-500' : 'text-green-500'}`}>
+                      {((user?.walletBalance || 0) - totalSats).toLocaleString()} sats
                     </span>
                   </div>
                 </div>
               )}
               
               <Button
-                className="w-full mt-6 bg-primary hover:bg-primary/90 flex items-center justify-center gap-2"
-                disabled={isCheckingOut || (isAuthenticated && (user?.walletBalance || 0) < totalXrp * 1000000)}
+                className="w-full mt-6 bg-bitcoin hover:bg-bitcoin-dark flex items-center justify-center gap-2"
+                disabled={isCheckingOut || (isAuthenticated && (user?.walletBalance || 0) < totalSats)}
                 onClick={handleCheckout}
               >
                 {isCheckingOut ? (
@@ -258,14 +258,14 @@ const Cart = () => {
                   </>
                 ) : (
                   <>
-                    <span>💎</span>
+                    <Bitcoin size={18} />
                     <span>Complete Purchase</span>
                   </>
                 )}
               </Button>
               
               {processingStage && (
-                <div className="text-xs text-center mt-2 text-primary animate-pulse">
+                <div className="text-xs text-center mt-2 text-bitcoin animate-pulse">
                   {processingStage}
                 </div>
               )}
@@ -276,7 +276,7 @@ const Cart = () => {
                 </p>
               )}
               
-              {isAuthenticated && (user?.walletBalance || 0) < totalXrp * 1000000 && (
+              {isAuthenticated && (user?.walletBalance || 0) < totalSats && (
                 <p className="text-xs text-center mt-4 text-red-500">
                   Insufficient wallet balance
                 </p>

@@ -265,7 +265,6 @@ export type Database = {
           id: string
           owner_id: string
           public_bitcoin_address: string | null
-          public_xrp_address: string | null
           shop_name: string
           updated_at: string
         }
@@ -275,7 +274,6 @@ export type Database = {
           id?: string
           owner_id: string
           public_bitcoin_address?: string | null
-          public_xrp_address?: string | null
           shop_name: string
           updated_at?: string
         }
@@ -285,7 +283,6 @@ export type Database = {
           id?: string
           owner_id?: string
           public_bitcoin_address?: string | null
-          public_xrp_address?: string | null
           shop_name?: string
           updated_at?: string
         }

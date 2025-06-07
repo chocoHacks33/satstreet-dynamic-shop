@@ -14,7 +14,7 @@
     --popover: 230 26% 16%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 214 90% 50%;
+    --primary: 35 97% 54%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 230 24% 20%;
@@ -31,18 +31,18 @@
 
     --border: 230 24% 26%;
     --input: 230 24% 26%;
-    --ring: 214 90% 50%;
+    --ring: 35 97% 54%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 230 30% 11%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 214 90% 50%;
+    --sidebar-primary: 35 97% 54%;
     --sidebar-primary-foreground: 210 40% 98%;
     --sidebar-accent: 230 24% 20%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 230 24% 26%;
-    --sidebar-ring: 214 90% 50%;
+    --sidebar-ring: 35 97% 54%;
   }
 }
 
@@ -52,13 +52,13 @@
   }
 
   body {
-    @apply bg-xstreet-dark text-foreground;
+    @apply bg-satstreet-dark text-foreground;
   }
 }
 
 @layer components {
-  .xrp-gradient {
-    @apply bg-gradient-to-r from-xrp-dark via-xrp to-xrp-light;
+  .bitcoin-gradient {
+    @apply bg-gradient-to-r from-bitcoin-dark via-bitcoin to-bitcoin-light;
   }
   
   .price-change-gradient {

@@ -1,12 +1,13 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Product {
   id: string;
   name: string;
   description: string;
-  priceInXrp: number;
+  priceInSats: number;
   shopName: string;
-  shopId?: string;
+  shopId?: string; // Add shopId property
   imageUrl: string;
   priceChangePercentage: number;
   priceHistory: PriceHistoryEntry[];
@@ -50,10 +51,10 @@ export const getProducts = async (): Promise<Product[]> => {
       id: product.id,
       name: product.name,
       description: product.description,
-      priceInXrp: product.price,
+      priceInSats: product.price,
       shopName: product.shop_name,
-      shopId: product.shop_id,
-      imageUrl: `/images/product${(Math.floor(Math.random() * 6) + 1)}.webp`,
+      shopId: product.shop_id, // Include shop_id 
+      imageUrl: `/images/product${(Math.floor(Math.random() * 6) + 1)}.webp`, // Placeholder image
       priceChangePercentage: parseFloat(priceChangePercentage.toFixed(2)),
       priceHistory: (product.price_history || []).map((history: any) => ({
         timestamp: history.timestamp,
@@ -95,9 +96,9 @@ export const getProductById = async (id: string): Promise<Product | null> => {
     id: product.id,
     name: product.name,
     description: product.description,
-    priceInXrp: product.price,
+    priceInSats: product.price,
     shopName: product.shop_name,
-    imageUrl: `/images/product${(Math.floor(Math.random() * 6) + 1)}.webp`,
+    imageUrl: `/images/product${(Math.floor(Math.random() * 6) + 1)}.webp`, // Placeholder image
     priceChangePercentage: parseFloat(priceChangePercentage.toFixed(2)),
     priceHistory: (product.price_history || []).map((history: any) => ({
       timestamp: history.timestamp,
@@ -197,7 +198,7 @@ export const getWalletInfo = async (userId: string) => {
     return { 
       balance: 0, 
       username: 'User',
-      publicKey: 'rDNz3Q9gxjmVQKmysQwLofwKqmZUzjTKkX',
+      publicKey: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
       transactions: [] 
     };
   }
@@ -206,32 +207,32 @@ export const getWalletInfo = async (userId: string) => {
   const mockTransactions = [
     {
       id: '1',
-      type: 'deposit' as 'deposit',
-      amount: 500,
+      type: 'deposit' as 'deposit',  // Using type assertion to specify literal type
+      amount: 50000,
       timestamp: new Date(Date.now() - 86400000).toISOString(),
       description: 'Initial deposit'
     },
     {
       id: '2',
-      type: 'purchase' as 'purchase',
-      amount: -125,
+      type: 'purchase' as 'purchase',  // Using type assertion to specify literal type
+      amount: -12500,
       timestamp: new Date(Date.now() - 43200000).toISOString(),
       description: 'Purchase of UltraFlex Running Shoes',
       productId: 'bf01fe26-f74d-4655-91ff-e32d257fc41d'
     },
     {
       id: '3',
-      type: 'deposit' as 'deposit',
-      amount: 250,
+      type: 'deposit' as 'deposit',  // Using type assertion to specify literal type
+      amount: 25000,
       timestamp: new Date(Date.now() - 21600000).toISOString(),
-      description: 'XRP payment received'
+      description: 'Lightning payment received'
     }
   ];
   
   return { 
     balance: data?.wallet_balance || 0, 
     username: data?.username || 'User',
-    publicKey: 'rDNz3Q9gxjmVQKmysQwLofwKqmZUzjTKkX',
+    publicKey: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
     transactions: mockTransactions
   };
 };
