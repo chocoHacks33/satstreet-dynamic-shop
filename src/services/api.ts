@@ -111,8 +111,8 @@ export const getProductImages = async (productId: string): Promise<string[]> => 
       return [];
     }
 
-    // Get the base URL from supabase client
-    const supabaseUrl = supabase.supabaseUrl;
+    // Use the hardcoded Supabase URL
+    const supabaseUrl = "https://wacicyiidaysfjdiaeim.supabase.co";
     const validImages = data
       .map(item => {
         if (!item.image_path) return null;
@@ -190,7 +190,7 @@ export const uploadProductImage = async (file: File, productId: string): Promise
       return null;
     }
 
-    return `${supabase.supabaseUrl}/storage/v1/object/public/product-images/${filePath}`;
+    return `https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images/${filePath}`;
   } catch (error) {
     console.error('Error in uploadProductImage:', error);
     return null;
