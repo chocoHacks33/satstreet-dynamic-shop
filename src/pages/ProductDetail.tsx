@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -38,12 +39,12 @@ const ChartTooltip = ({ active, payload, label }: ChartTooltipProps) => {
     const data = payload[0].payload;
     
     return (
-      <div className="bg-satstreet-medium p-4 border border-satstreet-light rounded-md shadow-lg">
+      <div className="bg-white p-4 border border-primary/20 rounded-md shadow-lg">
         <p className="font-medium text-sm">
           {new Date(data.timestamp).toLocaleString()}
         </p>
-        <p className="text-bitcoin font-mono font-bold mt-1">
-          {data.price.toLocaleString()} sats
+        <p className="text-primary font-mono font-bold mt-1">
+          {data.price.toLocaleString()} XRP
         </p>
         <p className="mt-2 text-xs text-muted-foreground max-w-60">
           {data.explanation}
@@ -75,7 +76,7 @@ const ProductDetail = () => {
     enabled: !!id
   });
   
-  // Fetch product images - updated for debugging
+  // Fetch product images
   useEffect(() => {
     const loadImages = async () => {
       if (id) {
@@ -96,7 +97,7 @@ const ProductDetail = () => {
     loadImages();
   }, [id, product]);
   
-  // Set up automatic refresh - modify the interval here (30000ms = 30 seconds)
+  // Set up automatic refresh
   const { 
     isRefreshing,
     formattedTimeUntilRefresh,
@@ -109,7 +110,7 @@ const ProductDetail = () => {
         description: "Latest market data has been fetched for this product",
       });
     },
-    intervalMs: 300000 // Change this value to modify refresh interval in milliseconds
+    intervalMs: 300000
   });
   
   // Handle manual refresh
@@ -131,7 +132,7 @@ const ProductDetail = () => {
   };
 
   const handleStockClick = () => {
-    window.open('https://btc.tokenview.io/en/tx/cb01ea705494ce66d7e5b7cb51bb5b39b8e8ce31e168d1bd7dda253af359cc77', '_blank');
+    window.open('https://xrpscan.com/tx/cb01ea705494ce66d7e5b7cb51bb5b39b8e8ce31e168d1bd7dda253af359cc77', '_blank');
   };
   
   useEffect(() => {
@@ -144,7 +145,7 @@ const ProductDetail = () => {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-white">
         <Navbar />
         <div className="container mx-auto px-4 py-8 flex-grow">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -167,7 +168,7 @@ const ProductDetail = () => {
   
   if (error || !product) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-white">
         <Navbar />
         <div className="container mx-auto px-4 py-8 flex-grow flex items-center justify-center">
           <div className="text-center">
@@ -179,7 +180,7 @@ const ProductDetail = () => {
             </p>
             <Button 
               onClick={() => navigate('/')}
-              className="bg-bitcoin hover:bg-bitcoin-dark"
+              className="bg-primary hover:bg-primary/90"
             >
               Back to Home
             </Button>
@@ -208,14 +209,14 @@ const ProductDetail = () => {
   const displayedPrice = selectedPriceEntry ? selectedPriceEntry.price : product.priceInSats;
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8 flex-grow">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Product Images */}
           <div>
-            <div className="aspect-square overflow-hidden rounded-lg border border-satstreet-light bg-satstreet-dark/30">
+            <div className="aspect-square overflow-hidden rounded-lg bg-secondary/20">
               {productImages.length > 0 ? (
                 <Carousel className="w-full">
                   <CarouselContent>
@@ -235,11 +236,11 @@ const ProductDetail = () => {
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="-left-4 bg-satstreet-medium border-satstreet-light" />
-                  <CarouselNext className="-right-4 bg-satstreet-medium border-satstreet-light" />
+                  <CarouselPrevious className="-left-4 bg-white" />
+                  <CarouselNext className="-right-4 bg-white" />
                 </Carousel>
               ) : (
-                <div className="h-full flex items-center justify-center bg-satstreet-dark/30">
+                <div className="h-full flex items-center justify-center bg-secondary/20">
                   <img 
                     src={product?.imageUrl || '/placeholder.svg'} 
                     alt={product?.name || 'Product'} 
@@ -261,8 +262,8 @@ const ProductDetail = () => {
                     onClick={() => setCurrentImageIndex(index)}
                     className={`aspect-square cursor-pointer overflow-hidden rounded-md border ${
                       currentImageIndex === index 
-                        ? 'border-bitcoin' 
-                        : 'border-satstreet-light'
+                        ? 'border-primary' 
+                        : 'border-border'
                     }`}
                   >
                     <img 
@@ -298,7 +299,7 @@ const ProductDetail = () => {
                   onClick={handleManualRefresh}
                   variant="ghost"
                   size="sm"
-                  className={`p-1 rounded-full hover:bg-satstreet-light transition-all ${isRefreshing ? 'animate-spin text-bitcoin' : ''}`}
+                  className={`p-1 rounded-full hover:bg-secondary transition-all ${isRefreshing ? 'animate-spin text-primary' : ''}`}
                   title="Refresh now"
                   disabled={isRefreshing}
                 >
@@ -313,14 +314,14 @@ const ProductDetail = () => {
                   <TooltipTrigger asChild>
                     <button
                       onClick={handleStockClick}
-                      className="inline-flex items-center text-sm cursor-pointer hover:text-bitcoin transition-colors"
+                      className="inline-flex items-center text-sm cursor-pointer hover:text-primary transition-colors"
                     >
                       <span className="font-medium">Stock: {product.stockCount || 0}</span>
                       <ExternalLink size={14} className="ml-1" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-[300px] bg-satstreet-dark border-satstreet-light">
-                    <p>Stock verified via Bitcoin blockchain commitments from the supplier using OP_RETURN to commit units of product</p>
+                  <TooltipContent className="max-w-[300px] bg-white">
+                    <p>Stock verified via XRP Ledger commitments from the supplier using memo fields</p>
                   </TooltipContent>
                 </UITooltip>
               </TooltipProvider>
@@ -329,7 +330,7 @@ const ProductDetail = () => {
             <p className="text-foreground mb-8">{product.description}</p>
             
             {/* Price History Chart */}
-            <div className="mb-8 bg-satstreet-medium p-4 rounded-lg border border-satstreet-light">
+            <div className="mb-8 bg-secondary/30 p-4 rounded-lg">
               <h2 className="text-lg font-medium mb-4">Price History</h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -340,11 +341,11 @@ const ProductDetail = () => {
                   >
                     <defs>
                       <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#F7931A" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#F7931A" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2D3348" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis 
                       dataKey="date" 
                       stroke="#9CA3AF" 
@@ -359,7 +360,7 @@ const ProductDetail = () => {
                     <Area 
                       type="monotone" 
                       dataKey="price" 
-                      stroke="#F7931A" 
+                      stroke="hsl(var(--primary))" 
                       fillOpacity={1}
                       fill="url(#colorPrice)" 
                     />
@@ -376,7 +377,7 @@ const ProductDetail = () => {
                 productId={product.id}
               />
               {selectedPriceEntry && (
-                <div className="mt-2 text-xs text-bitcoin">
+                <div className="mt-2 text-xs text-primary">
                   <span className="flex items-center gap-1">
                     <span>🔍</span>
                     Viewing pricing data from {new Date(selectedPriceEntry.timestamp).toLocaleString()}
@@ -388,9 +389,9 @@ const ProductDetail = () => {
             <Button 
               onClick={handleAddToCart}
               size="lg"
-              className="w-full bg-bitcoin hover:bg-bitcoin-dark"
+              className="w-full bg-primary hover:bg-primary/90"
             >
-              Add to Cart ({product.priceInSats.toLocaleString()} sats)
+              Add to Cart ({product.priceInSats.toLocaleString()} XRP)
             </Button>
           </div>
         </div>

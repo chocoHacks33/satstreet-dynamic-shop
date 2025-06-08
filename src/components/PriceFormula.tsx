@@ -74,7 +74,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
   
   // Calculate price components based on market factors
   const calculateComponents = (): PriceComponents => {
-    // Base price components in satoshis
+    // Base price components in XRP
     const basePrice = Math.floor(currentPrice * 0.7); // 70% of current price as base
     
     // Use market factors to calculate price components
@@ -182,7 +182,7 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
 
   return (
     <TooltipProvider>
-      <div className="bg-satstreet-medium p-5 rounded-lg border border-satstreet-light">
+      <div className="bg-secondary/30 p-5 rounded-lg">
         <h3 className="font-semibold mb-4 text-lg flex items-center">
           <span className="mr-2">Pricing Logic</span>
           <HoverCard>
@@ -191,12 +191,12 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
                 <AlertCircle size={16} className="text-muted-foreground" />
               </span>
             </HoverCardTrigger>
-            <HoverCardContent className="w-80 bg-satstreet-dark border-satstreet-light">
+            <HoverCardContent className="w-80 bg-white">
               <div className="text-sm">
                 <p className="font-medium mb-2">How This Price Is Calculated</p>
                 <p className="text-muted-foreground">
                   This breakdown shows you how the current price is determined based on 
-                  market factors like Bitcoin price (${marketFactors.bitcoinPrice.toLocaleString()}), 
+                  market factors like XRP price (${marketFactors.bitcoinPrice.toLocaleString()}), 
                   network demand, inventory levels, and special promotions.
                 </p>
               </div>
@@ -212,18 +212,18 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
           
           {/* Calculated Formula with Values */}
           <div className="flex flex-wrap items-center gap-y-2">
-            <div className="font-medium mr-2 text-bitcoin">Price =</div>
+            <div className="font-medium mr-2 text-primary">Price =</div>
             
             {/* Base Price */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-satstreet-light inline-flex items-center">
+                <div className="px-2 py-1 mr-1 rounded-md bg-white border inline-flex items-center">
                   <animated.div>
                     {animatedBase.number.to(n => Math.floor(n).toLocaleString())}
                   </animated.div>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="bg-satstreet-dark border-satstreet-light">
+              <TooltipContent className="bg-white">
                 <p>Base price (starting value)</p>
               </TooltipContent>
             </Tooltip>
@@ -238,21 +238,21 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
                     to={`/lightning/${productId}`}
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-bitcoin/30 inline-flex items-center hover:border-bitcoin transition-colors"
+                    className="px-2 py-1 mr-1 rounded-md bg-white border border-primary/30 inline-flex items-center hover:border-primary transition-colors"
                   >
-                    <span className="mr-1 text-xs text-bitcoin">{coefficients.alpha}</span>
+                    <span className="mr-1 text-xs text-primary">{coefficients.alpha}</span>
                     <span className="mr-1">(</span>
                     <animated.div>
                       {animatedLightning.number.to(n => Math.floor(n).toLocaleString())}
                     </animated.div>
                     <span className="ml-1">)</span>
-                    <Zap size={12} className="ml-1 text-bitcoin" />
+                    <Zap size={12} className="ml-1 text-primary" />
                   </Link>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="bg-satstreet-dark border-satstreet-light">
+              <TooltipContent className="bg-white">
                 <div className="space-y-2">
-                  <p>Market demand from Lightning Network activity</p>
+                  <p>Market demand from XRP Network activity</p>
                   <p>Current network demand: {Math.round(marketFactors.networkDemand * 100)}%</p>
                   <p className="text-xs text-muted-foreground">Click to view transactions in new tab</p>
                 </div>
@@ -264,17 +264,17 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
             {/* Inventory */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-blue-500/30 inline-flex items-center">
-                  <span className="mr-1 text-xs text-blue-400">{coefficients.beta}</span>
+                <div className="px-2 py-1 mr-1 rounded-md bg-white border border-blue-500/30 inline-flex items-center">
+                  <span className="mr-1 text-xs text-blue-600">{coefficients.beta}</span>
                   <span className="mr-1">(</span>
                   <animated.div>
                     {animatedInventory.number.to(n => Math.floor(n).toLocaleString())}
                   </animated.div>
                   <span className="ml-1">)</span>
-                  <TrendingUp size={12} className="ml-1 text-blue-400" />
+                  <TrendingUp size={12} className="ml-1 text-blue-600" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="bg-satstreet-dark border-satstreet-light">
+              <TooltipContent className="bg-white">
                 <div>
                   <p>Supply adjustment based on current inventory levels</p>
                   <p>Current inventory: {marketFactors.inventoryLevel}%</p>
@@ -287,17 +287,17 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
             {/* Time Event */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-purple-500/30 inline-flex items-center">
-                  <span className="mr-1 text-xs text-purple-400">{coefficients.gamma}</span>
+                <div className="px-2 py-1 mr-1 rounded-md bg-white border border-purple-500/30 inline-flex items-center">
+                  <span className="mr-1 text-xs text-purple-600">{coefficients.gamma}</span>
                   <span className="mr-1">(</span>
                   <animated.div>
                     {animatedTimeEvent.number.to(n => Math.floor(n).toLocaleString())}
                   </animated.div>
                   <span className="ml-1">)</span>
-                  <Timer size={12} className="ml-1 text-purple-400" />
+                  <Timer size={12} className="ml-1 text-purple-600" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="bg-satstreet-dark border-satstreet-light">
+              <TooltipContent className="bg-white">
                 <div>
                   <p>Seasonal factors and special events that affect pricing</p>
                   <p>Seasonal factor: {marketFactors.seasonalFactor.toFixed(2)}</p>
@@ -310,17 +310,17 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
             {/* Loyalty Discount */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="px-2 py-1 mr-1 rounded-md bg-satstreet-dark border border-red-500/30 inline-flex items-center">
-                  <span className="mr-1 text-xs text-red-400">{coefficients.delta}</span>
+                <div className="px-2 py-1 mr-1 rounded-md bg-white border border-red-500/30 inline-flex items-center">
+                  <span className="mr-1 text-xs text-red-600">{coefficients.delta}</span>
                   <span className="mr-1">(</span>
                   <animated.div>
                     {animatedDiscount.number.to(n => Math.floor(n).toLocaleString())}
                   </animated.div>
                   <span className="ml-1">)</span>
-                  <Heart size={12} className="ml-1 text-red-400" />
+                  <Heart size={12} className="ml-1 text-red-600" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="bg-satstreet-dark border-satstreet-light">
+              <TooltipContent className="bg-white">
                 <div>
                   <p>Available discounts and promotional offers</p>
                   <p>{marketFactors.promotionActive ? 'Promotion active!' : 'No active promotions'}</p>
@@ -331,26 +331,26 @@ const PriceFormula: React.FC<PriceFormulaProps> = ({
             <div className="ml-2 mr-2">=</div>
             
             {/* Final Price */}
-            <div className="px-3 py-1 rounded-md bg-bitcoin/20 border border-bitcoin font-bold inline-flex items-center">
+            <div className="px-3 py-1 rounded-md bg-primary/20 border border-primary font-bold inline-flex items-center">
               <animated.div>
                 {animatedTotal.number.to(n => Math.floor(n).toLocaleString())}
               </animated.div>
-              <span className="ml-1">sats</span>
+              <span className="ml-1">XRP</span>
             </div>
           </div>
         </div>
         
-        {/* Bitcoin Price Info */}
-        <div className="mt-3 p-2 bg-satstreet-dark/50 rounded text-xs">
-          <span className="font-medium">Bitcoin Price:</span> 
-          <span className="text-bitcoin ml-1">${marketFactors.bitcoinPrice.toLocaleString()} USD</span>
+        {/* XRP Price Info */}
+        <div className="mt-3 p-2 bg-white/50 rounded text-xs">
+          <span className="font-medium">XRP Price:</span> 
+          <span className="text-primary ml-1">${marketFactors.bitcoinPrice.toLocaleString()} USD</span>
         </div>
         
         {/* Explanation */}
         <div className="mt-4 text-sm text-muted-foreground">
           <p>
             {historyEntry?.explanation || 
-             `Current price is determined by Bitcoin price ($${marketFactors.bitcoinPrice.toLocaleString()}), network demand (${Math.round(marketFactors.networkDemand * 100)}%), and inventory levels.`}
+             `Current price is determined by XRP price ($${marketFactors.bitcoinPrice.toLocaleString()}), network demand (${Math.round(marketFactors.networkDemand * 100)}%), and inventory levels.`}
           </p>
         </div>
       </div>

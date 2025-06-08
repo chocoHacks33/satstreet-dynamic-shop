@@ -34,18 +34,30 @@ export const getProducts = async (): Promise<Product[]> => {
       return [];
     }
 
-    // Transform the data to match our Product interface
-    const products: Product[] = (data || []).map(product => ({
-      id: product.id,
-      createdAt: product.created_at,
-      name: product.name,
-      description: product.description || '',
-      imageUrl: '/placeholder.svg', // Default placeholder
-      priceInSats: product.price,
-      priceChangePercentage: 0, // Will be calculated from price history
-      shopName: product.shop_name,
-      stockCount: product.stock_count,
-      priceHistory: []
+    // Transform and enrich each product with price history
+    const products: Product[] = await Promise.all((data || []).map(async product => {
+      const priceHistory = await getPriceHistory(product.id);
+      
+      // Calculate price change percentage from price history
+      let priceChangePercentage = 0;
+      if (priceHistory.length >= 2) {
+        const currentPrice = priceHistory[0].price;
+        const previousPrice = priceHistory[1].price;
+        priceChangePercentage = ((currentPrice - previousPrice) / previousPrice) * 100;
+      }
+
+      return {
+        id: product.id,
+        createdAt: product.created_at,
+        name: product.name,
+        description: product.description || '',
+        imageUrl: '/placeholder.svg',
+        priceInSats: product.price,
+        priceChangePercentage,
+        shopName: product.shop_name,
+        stockCount: product.stock_count,
+        priceHistory
+      };
     }));
 
     return products;
@@ -70,18 +82,28 @@ export const getProductById = async (id: string): Promise<Product | null> => {
 
     if (!data) return null;
 
-    // Transform the data to match our Product interface
+    // Get price history for this product
+    const priceHistory = await getPriceHistory(id);
+    
+    // Calculate price change percentage from price history
+    let priceChangePercentage = 0;
+    if (priceHistory.length >= 2) {
+      const currentPrice = priceHistory[0].price;
+      const previousPrice = priceHistory[1].price;
+      priceChangePercentage = ((currentPrice - previousPrice) / previousPrice) * 100;
+    }
+
     const product: Product = {
       id: data.id,
       createdAt: data.created_at,
       name: data.name,
       description: data.description || '',
-      imageUrl: '/placeholder.svg', // Default placeholder
+      imageUrl: '/placeholder.svg',
       priceInSats: data.price,
-      priceChangePercentage: 0, // Will be calculated from price history
+      priceChangePercentage,
       shopName: data.shop_name,
       stockCount: data.stock_count,
-      priceHistory: []
+      priceHistory
     };
 
     return product;
