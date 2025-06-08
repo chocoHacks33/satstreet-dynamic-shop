@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -56,18 +57,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-card py-4 px-4 md:px-8 border-b border-border">
+    <nav className="bg-white py-4 px-4 md:px-8 border-b border-border shadow-sm">
       <div className="container mx-auto flex justify-between items-center">
-        {/* Logo - always visible */}
         <Link to="/" className="flex items-center">
-          <div className="bg-card rounded-full p-1 flex items-center justify-center">
-            <img 
-              src="https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2//satstreet_logo_vector.svg" 
-              alt="xStreet" 
-              className="h-12 w-auto mr-3"
-            />
-          </div>
-          <span className="text-xl font-bold text-xrp">
+          <span className="text-2xl font-bold text-primary">
             xStreet
           </span>
         </Link>
@@ -84,18 +77,18 @@ const Navbar = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={navToWallet}
-                className="text-sm border-xrp/30 hover:border-xrp hover:bg-card"
+                className="text-sm border-primary/30 hover:border-primary hover:bg-secondary text-primary"
               >
-                <span className="font-mono text-xrp">{user?.walletBalance.toLocaleString()} XRP</span>
+                <span className="font-mono">{user?.walletBalance.toLocaleString()} XRP</span>
               </Button>
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost">
+                  <Button size="icon" variant="ghost" className="hover:bg-secondary">
                     <User />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-card border-border">
+                <DropdownMenuContent align="end" className="bg-white border-border">
                   <DropdownMenuLabel className="text-center">{user?.username}</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-border" />
                   <DropdownMenuItem onClick={navToWallet}>My Wallet</DropdownMenuItem>
@@ -107,11 +100,11 @@ const Navbar = () => {
                 onClick={navToCart} 
                 size="icon" 
                 variant="ghost" 
-                className="relative"
+                className="relative hover:bg-secondary"
               >
                 <ShoppingCart />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-xrp text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
@@ -122,7 +115,7 @@ const Navbar = () => {
               <Button 
                 onClick={navToLogin} 
                 variant="default"
-                className="bg-xrp hover:bg-xrp-dark text-white"
+                className="bg-primary hover:bg-primary/90 text-white"
               >
                 Login
               </Button>
@@ -130,11 +123,11 @@ const Navbar = () => {
                 onClick={navToCart} 
                 size="icon" 
                 variant="ghost" 
-                className="relative"
+                className="relative hover:bg-secondary"
               >
                 <ShoppingCart />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-xrp text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
@@ -145,16 +138,15 @@ const Navbar = () => {
 
         {/* Mobile menu button */}
         <div className="md:hidden flex items-center">
-          {/* Cart icon always visible on mobile */}
           <Button 
             onClick={navToCart}
             size="icon" 
             variant="ghost"
-            className="relative mr-2"
+            className="relative mr-2 hover:bg-secondary"
           >
             <ShoppingCart />
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-xrp text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {totalItems}
               </span>
             )}
@@ -164,6 +156,7 @@ const Navbar = () => {
             size="icon"
             variant="ghost" 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="hover:bg-secondary"
           >
             {mobileMenuOpen ? <X /> : <Menu />}
           </Button>
@@ -185,7 +178,7 @@ const Navbar = () => {
                 onClick={navToWallet}
                 className="justify-start"
               >
-                <span className="font-mono mr-2 text-xrp">{user?.walletBalance.toLocaleString()} XRP</span>
+                <span className="font-mono mr-2 text-primary">{user?.walletBalance.toLocaleString()} XRP</span>
                 My Wallet
               </Button>
               <Button 
@@ -202,7 +195,7 @@ const Navbar = () => {
               <Button 
                 onClick={navToLogin} 
                 variant="default" 
-                className="w-full bg-xrp hover:bg-xrp-dark text-white"
+                className="w-full bg-primary hover:bg-primary/90 text-white"
               >
                 Login
               </Button>

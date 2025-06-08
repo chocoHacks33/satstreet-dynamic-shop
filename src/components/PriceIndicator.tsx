@@ -17,10 +17,10 @@ const PriceIndicator = ({
   
   // Color intensity based on the percentage change
   const getColorIntensity = () => {
-    if (absChange < 1) return 'text-price-neutral';
-    if (absChange < 3) return isPositive ? 'text-green-400' : 'text-red-400';
-    if (absChange < 5) return isPositive ? 'text-green-500' : 'text-red-500';
-    return isPositive ? 'text-green-600' : 'text-red-600';
+    if (absChange < 1) return 'text-muted-foreground';
+    if (absChange < 3) return isPositive ? 'text-green-600' : 'text-red-600';
+    if (absChange < 5) return isPositive ? 'text-green-700' : 'text-red-700';
+    return isPositive ? 'text-green-800' : 'text-red-800';
   };
 
   const iconSize = {
@@ -38,7 +38,7 @@ const PriceIndicator = ({
   const Arrow = isPositive ? ArrowUp : ArrowDown;
   
   return (
-    <div className={`flex items-center ${getColorIntensity()} ${isPositive ? 'animate-price-pulse-up' : 'animate-price-pulse-down'}`}>
+    <div className={`flex items-center ${getColorIntensity()}`}>
       <span className={`font-mono font-medium ${textSizeClasses}`}>
         {priceInSats.toLocaleString()} XRP
       </span>

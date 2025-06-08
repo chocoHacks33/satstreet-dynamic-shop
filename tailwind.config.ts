@@ -54,9 +54,9 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				xrp: {
-					DEFAULT: '#F7931A',
-					light: '#FFB74D',
-					dark: '#E65100'
+					DEFAULT: 'hsl(var(--primary))',
+					light: '#66BB6A',
+					dark: '#2E7D32'
 				},
 				price: {
 					up: '#4CAF50',

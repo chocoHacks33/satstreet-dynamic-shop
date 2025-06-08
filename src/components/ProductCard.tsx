@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PriceIndicator from './PriceIndicator';
@@ -82,9 +83,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Card 
       onClick={handleViewProduct}
-      className="overflow-hidden border-border hover:border-xrp/50 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-card"
+      className="overflow-hidden border-border hover:border-primary/50 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-white shadow-sm"
     >
-      <div className="aspect-square overflow-hidden bg-secondary/50">
+      <div className="aspect-square overflow-hidden bg-secondary/20">
         <img 
           src={productImage} 
           alt={product.name}
@@ -96,7 +97,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       
       <CardContent className="p-4">
         <div className="text-xs text-muted-foreground">{product.shopName}</div>
-        <h3 className="font-medium text-lg mt-1">{product.name}</h3>
+        <h3 className="font-medium text-lg mt-1 text-foreground">{product.name}</h3>
         {truncatedDescription && (
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{truncatedDescription}</p>
         )}
@@ -112,13 +113,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
               <TooltipTrigger asChild>
                 <span 
                   onClick={handleStockClick}
-                  className="inline-flex items-center text-xs cursor-pointer text-muted-foreground hover:text-xrp"
+                  className="inline-flex items-center text-xs cursor-pointer text-muted-foreground hover:text-primary"
                 >
                   <span>Stock: {product.stockCount || 0}</span>
                   <ExternalLink size={12} className="ml-1" />
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="max-w-[250px] bg-card border-border">
+              <TooltipContent className="max-w-[250px] bg-white border-border">
                 <p>Stock verified via XRP Ledger commitments from the supplier using memo fields</p>
               </TooltipContent>
             </Tooltip>
@@ -131,7 +132,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           variant="outline" 
           size="sm" 
           onClick={handleViewProduct}
-          className="text-xs"
+          className="text-xs border-border hover:bg-secondary"
         >
           View Details
         </Button>
@@ -139,7 +140,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           variant="default" 
           size="sm"
           onClick={handleAddToCart}
-          className="text-xs bg-xrp hover:bg-xrp-dark text-white"
+          className="text-xs bg-primary hover:bg-primary/90 text-white"
         >
           Add to Cart
         </Button>

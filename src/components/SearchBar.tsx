@@ -30,13 +30,13 @@ const SearchBar = ({
         placeholder={placeholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="pr-10 bg-card border-border focus:border-xrp focus:ring-xrp"
+        className="pr-10 bg-white border-border focus:border-primary focus:ring-primary rounded-md"
       />
       <Button 
         type="submit" 
         size="icon" 
         variant="ghost" 
-        className="absolute right-0"
+        className="absolute right-0 hover:bg-secondary"
       >
         <Search size={18} />
       </Button>
