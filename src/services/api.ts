@@ -1,275 +1,122 @@
-
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from './supabaseClient';
 
 export interface Product {
   id: string;
+  createdAt: string;
   name: string;
   description: string;
-  priceInSats: number;
-  shopName: string;
-  shopId?: string; // Add shopId property
   imageUrl: string;
+  priceInSats: number;
   priceChangePercentage: number;
-  priceHistory: PriceHistoryEntry[];
+  shopName: string;
   stockCount: number;
+  priceHistory: PriceEntry[];
 }
 
-export interface PriceHistoryEntry {
+export interface PriceEntry {
   timestamp: string;
   price: number;
   explanation: string;
 }
 
 export const getProducts = async (): Promise<Product[]> => {
-  // Fetch products from Supabase
-  const { data: products, error } = await supabase
-    .from('products')
-    .select(`
-      *,
-      price_history:price_history(*)
-    `)
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*');
 
-  if (error) {
-    console.error('Error fetching products:', error);
-    return [];
-  }
-  
-  // Transform the data to match our Product interface
-  return products.map(product => {
-    // Calculate price change percentage based on price history
-    const priceHistory = product.price_history || [];
-    let priceChangePercentage = 0;
-
-    if (priceHistory.length > 1) {
-      const currentPrice = product.price;
-      const previousPrice = priceHistory[priceHistory.length - 2]?.price || currentPrice;
-      priceChangePercentage = previousPrice !== 0 ? ((currentPrice - previousPrice) / previousPrice) * 100 : 0;
+    if (error) {
+      console.error('Error fetching products:', error);
+      return [];
     }
 
-    return {
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      priceInSats: product.price,
-      shopName: product.shop_name,
-      shopId: product.shop_id, // Include shop_id 
-      imageUrl: `/images/product${(Math.floor(Math.random() * 6) + 1)}.webp`, // Placeholder image
-      priceChangePercentage: parseFloat(priceChangePercentage.toFixed(2)),
-      priceHistory: (product.price_history || []).map((history: any) => ({
-        timestamp: history.timestamp,
-        price: history.price,
-        explanation: history.explanation || ''
-      })),
-      stockCount: product.stock_count || 0
-    };
-  });
+    return data || [];
+  } catch (error) {
+    console.error('Error in getProducts:', error);
+    return [];
+  }
 };
 
 export const getProductById = async (id: string): Promise<Product | null> => {
-  // Fetch a single product by ID from Supabase
-  const { data: product, error } = await supabase
-    .from('products')
-    .select(`
-      *,
-      price_history:price_history(*)
-    `)
-    .eq('id', id)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (error || !product) {
-    console.error('Error fetching product by ID:', error);
+    if (error) {
+      console.error('Error fetching product by ID:', error);
+      return null;
+    }
+
+    return data || null;
+  } catch (error) {
+    console.error('Error in getProductById:', error);
     return null;
   }
-
-  // Calculate price change percentage
-  const priceHistory = product.price_history || [];
-  let priceChangePercentage = 0;
-
-  if (priceHistory.length > 1) {
-    const currentPrice = product.price;
-    const previousPrice = priceHistory[priceHistory.length - 2]?.price || currentPrice;
-    priceChangePercentage = previousPrice !== 0 ? ((currentPrice - previousPrice) / previousPrice) * 100 : 0;
-  }
-
-  return {
-    id: product.id,
-    name: product.name,
-    description: product.description,
-    priceInSats: product.price,
-    shopName: product.shop_name,
-    imageUrl: `/images/product${(Math.floor(Math.random() * 6) + 1)}.webp`, // Placeholder image
-    priceChangePercentage: parseFloat(priceChangePercentage.toFixed(2)),
-    priceHistory: (product.price_history || []).map((history: any) => ({
-      timestamp: history.timestamp,
-      price: history.price,
-      explanation: history.explanation || ''
-    })),
-    stockCount: product.stock_count || 0
-  };
 };
 
 export const getProductImages = async (productId: string): Promise<string[]> => {
-  console.log('Fetching product images for product ID:', productId);
-  
   try {
-    // Check for product images in the database table regardless of bucket status
-    const { data: productImages, error } = await supabase
+    console.log('Fetching images for product ID:', productId);
+    
+    const { data, error } = await supabase
       .from('product_images')
-      .select('image_path')
+      .select('image_url')
       .eq('product_id', productId)
-      .order('display_order', { ascending: true });
-
-    console.log('Product images database query result:', { productImages, error });
+      .order('created_at', { ascending: true });
 
     if (error) {
-      console.error('Error fetching product images from database:', error);
-      return getPlaceholderImages();
+      console.error('Error fetching product images:', error);
+      return [];
     }
 
-    if (!productImages || productImages.length === 0) {
-      console.log('No product images found in database for product', productId);
-      return getPlaceholderImages();
+    if (!data || data.length === 0) {
+      console.log('No images found for product:', productId);
+      return [];
     }
-    
-    // Generate direct URLs for the website - bypassing storage bucket issues
-    // Use hard-coded valid image URLs that will work for the demo
-    const publicPath = 'https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2/';
-    
-    // Log the supabase project id for verification
-    console.log('Supabase project ID:', supabase.projectRef);
-    
-    // Process the image paths to create proper URLs
-    const processedImages = productImages.map(img => {
-      // If the image path is already a full URL, use it
-      if (img.image_path.startsWith('http')) {
-        return img.image_path;
-      }
-      
-      // Otherwise, construct the URL directly using the known pattern
-      const fullUrl = `${publicPath}${encodeURIComponent(img.image_path)}`;
-      console.log(`Generated URL for ${img.image_path}:`, fullUrl);
-      return fullUrl;
-    });
-    
-    // Return the processed images or fallback to placeholders if all are invalid
-    const validImages = processedImages.filter(url => url && !url.includes('undefined'));
-    return validImages.length > 0 ? validImages : getPlaceholderImages();
-  } catch (err) {
-    console.error('Unexpected error in getProductImages:', err);
-    return getPlaceholderImages();
+
+    // Get the base URL from supabase client
+    const supabaseUrl = supabase.supabaseUrl;
+    const validImages = data
+      .map(item => {
+        if (!item.image_url) return null;
+        
+        // If it's already a full URL, return as is
+        if (item.image_url.startsWith('http')) {
+          return item.image_url;
+        }
+        
+        // Construct the full URL for storage bucket images
+        return `${supabaseUrl}/storage/v1/object/public/product-images-2/${item.image_url}`;
+      })
+      .filter((url): url is string => url !== null);
+
+    console.log('Valid product images found:', validImages);
+    return validImages;
+  } catch (error) {
+    console.error('Error in getProductImages:', error);
+    return [];
   }
 };
 
-// Helper function to get placeholder images
-const getPlaceholderImages = (): string[] => {
-  console.log('Using placeholder images as fallback');
-  return [
-    getRandomPlaceholder(),
-    getRandomPlaceholder(),
-    getRandomPlaceholder()
-  ];
-};
+export const getPriceHistory = async (productId: string): Promise<PriceEntry[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('price_history')
+      .select('*')
+      .eq('product_id', productId)
+      .order('timestamp', { ascending: false });
 
-// Helper function to get a random placeholder image
-const getRandomPlaceholder = (): string => {
-  const placeholders = [
-    '/images/product1.webp',
-    '/images/product2.webp',
-    '/images/product3.webp',
-    '/images/product4.webp',
-    '/images/product5.webp',
-    '/images/product6.webp',
-    '/placeholder.svg'
-  ];
-  return placeholders[Math.floor(Math.random() * placeholders.length)];
-};
-
-// Helper function for Wallet page
-export const getWalletInfo = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('wallet_balance, username')
-    .eq('id', userId)
-    .single();
-    
-  if (error) {
-    console.error('Error fetching wallet info:', error);
-    return { 
-      balance: 0, 
-      username: 'User',
-      publicKey: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
-      transactions: [] 
-    };
-  }
-  
-  // Mock transactions for demonstration with proper literal types
-  const mockTransactions = [
-    {
-      id: '1',
-      type: 'deposit' as 'deposit',  // Using type assertion to specify literal type
-      amount: 50000,
-      timestamp: new Date(Date.now() - 86400000).toISOString(),
-      description: 'Initial deposit'
-    },
-    {
-      id: '2',
-      type: 'purchase' as 'purchase',  // Using type assertion to specify literal type
-      amount: -12500,
-      timestamp: new Date(Date.now() - 43200000).toISOString(),
-      description: 'Purchase of UltraFlex Running Shoes',
-      productId: 'bf01fe26-f74d-4655-91ff-e32d257fc41d'
-    },
-    {
-      id: '3',
-      type: 'deposit' as 'deposit',  // Using type assertion to specify literal type
-      amount: 25000,
-      timestamp: new Date(Date.now() - 21600000).toISOString(),
-      description: 'Lightning payment received'
+    if (error) {
+      console.error('Error fetching price history:', error);
+      return [];
     }
-  ];
-  
-  return { 
-    balance: data?.wallet_balance || 0, 
-    username: data?.username || 'User',
-    publicKey: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
-    transactions: mockTransactions
-  };
-};
 
-export const uploadProductImage = async (file: File, productId: string) => {
-  const fileExt = file.name.split('.').pop();
-  const filePath = `${productId}/${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-  
-  // Check if the bucket exists, if not try to create it
-  const { data: buckets } = await supabase.storage.listBuckets();
-  if (!buckets?.some(bucket => bucket.name === 'product-images-2')) {
-    console.error('Product-images-2 bucket does not exist in storage. Images cannot be uploaded.');
+    return data || [];
+  } catch (error) {
+    console.error('Error in getPriceHistory:', error);
+    return [];
   }
-  
-  const { error: uploadError } = await supabase.storage
-    .from('product-images-2')
-    .upload(filePath, file);
-    
-  if (uploadError) {
-    console.error('Error uploading image:', uploadError);
-    return null;
-  }
-  
-  const { data } = supabase.storage
-    .from('product-images-2')
-    .getPublicUrl(filePath);
-    
-  // Save the image reference to the product_images table
-  const { error: insertError } = await supabase.from('product_images').insert({
-    product_id: productId,
-    image_path: filePath, // Store just the path, not the full URL
-    is_primary: false
-  });
-  
-  if (insertError) {
-    console.error('Error saving image reference:', insertError);
-  }
-  
-  return data.publicUrl;
 };

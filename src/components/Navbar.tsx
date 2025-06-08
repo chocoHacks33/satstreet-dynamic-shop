@@ -56,18 +56,18 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-satstreet-dark py-4 px-4 md:px-8 border-b border-satstreet-medium">
+    <nav className="bg-card py-4 px-4 md:px-8 border-b border-border">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo - always visible */}
         <Link to="/" className="flex items-center">
-          <div className="bg-satstreet-dark rounded-full p-1 flex items-center justify-center">
+          <div className="bg-card rounded-full p-1 flex items-center justify-center">
             <img 
               src="https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2//satstreet_logo_vector.svg" 
               alt="xStreet" 
               className="h-12 w-auto mr-3"
             />
           </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent xrp-gradient">
+          <span className="text-xl font-bold text-xrp">
             xStreet
           </span>
         </Link>
@@ -84,9 +84,9 @@ const Navbar = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={navToWallet}
-                className="text-sm border-xrp/30 hover:border-xrp hover:bg-satstreet-light"
+                className="text-sm border-xrp/30 hover:border-xrp hover:bg-card"
               >
-                <span className="font-mono">{user?.walletBalance.toLocaleString()} XRP</span>
+                <span className="font-mono text-xrp">{user?.walletBalance.toLocaleString()} XRP</span>
               </Button>
               
               <DropdownMenu>
@@ -95,9 +95,9 @@ const Navbar = () => {
                     <User />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-satstreet-medium border-satstreet-light">
+                <DropdownMenuContent align="end" className="bg-card border-border">
                   <DropdownMenuLabel className="text-center">{user?.username}</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-satstreet-light" />
+                  <DropdownMenuSeparator className="bg-border" />
                   <DropdownMenuItem onClick={navToWallet}>My Wallet</DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
@@ -122,7 +122,7 @@ const Navbar = () => {
               <Button 
                 onClick={navToLogin} 
                 variant="default"
-                className="bg-xrp hover:bg-xrp-dark"
+                className="bg-xrp hover:bg-xrp-dark text-white"
               >
                 Login
               </Button>
@@ -172,7 +172,7 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-4 pt-4 border-t border-satstreet-light">
+        <div className="md:hidden mt-4 pt-4 border-t border-border">
           <div className="px-4 py-2">
             <SearchBar onSearch={handleSearch} />
           </div>
@@ -185,7 +185,7 @@ const Navbar = () => {
                 onClick={navToWallet}
                 className="justify-start"
               >
-                <span className="font-mono mr-2">{user?.walletBalance.toLocaleString()} XRP</span>
+                <span className="font-mono mr-2 text-xrp">{user?.walletBalance.toLocaleString()} XRP</span>
                 My Wallet
               </Button>
               <Button 
@@ -202,7 +202,7 @@ const Navbar = () => {
               <Button 
                 onClick={navToLogin} 
                 variant="default" 
-                className="w-full bg-xrp hover:bg-xrp-dark"
+                className="w-full bg-xrp hover:bg-xrp-dark text-white"
               >
                 Login
               </Button>

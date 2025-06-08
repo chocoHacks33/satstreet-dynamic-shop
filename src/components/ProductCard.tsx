@@ -82,9 +82,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Card 
       onClick={handleViewProduct}
-      className="overflow-hidden border-satstreet-light hover:border-xrp/50 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-satstreet-medium"
+      className="overflow-hidden border-border hover:border-xrp/50 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-card"
     >
-      <div className="aspect-square overflow-hidden bg-satstreet-dark/50">
+      <div className="aspect-square overflow-hidden bg-secondary/50">
         <img 
           src={productImage} 
           alt={product.name}
@@ -118,7 +118,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                   <ExternalLink size={12} className="ml-1" />
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="max-w-[250px] bg-satstreet-dark border-satstreet-light">
+              <TooltipContent className="max-w-[250px] bg-card border-border">
                 <p>Stock verified via XRP Ledger commitments from the supplier using memo fields</p>
               </TooltipContent>
             </Tooltip>
@@ -139,7 +139,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           variant="default" 
           size="sm"
           onClick={handleAddToCart}
-          className="text-xs bg-xrp hover:bg-xrp-dark"
+          className="text-xs bg-xrp hover:bg-xrp-dark text-white"
         >
           Add to Cart
         </Button>

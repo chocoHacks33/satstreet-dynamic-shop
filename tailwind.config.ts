@@ -54,19 +54,14 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				xrp: {
-					DEFAULT: '#00D4DD',
-					light: '#33E0E8',
-					dark: '#00B8C0'
+					DEFAULT: '#F7931A',
+					light: '#FFB74D',
+					dark: '#E65100'
 				},
 				price: {
-					up: '#10B981',
-					down: '#EF4444',
-					neutral: '#9CA3AF'
-				},
-				satstreet: {
-					dark: '#161923',
-					medium: '#22253A',
-					light: '#2D3348'
+					up: '#4CAF50',
+					down: '#F44336',
+					neutral: '#9E9E9E'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -106,7 +101,7 @@ export default {
 						backgroundColor: 'transparent' 
 					},
 					'50%': { 
-						backgroundColor: 'rgba(16, 185, 129, 0.2)' 
+						backgroundColor: 'rgba(76, 175, 80, 0.2)' 
 					}
 				},
 				'price-pulse-down': {
@@ -114,7 +109,7 @@ export default {
 						backgroundColor: 'transparent' 
 					},
 					'50%': { 
-						backgroundColor: 'rgba(239, 68, 68, 0.2)' 
+						backgroundColor: 'rgba(244, 67, 54, 0.2)' 
 					}
 				}
 			},
