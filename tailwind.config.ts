@@ -53,10 +53,10 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				bitcoin: {
-					DEFAULT: '#F7931A',
-					light: '#FAB04C',
-					dark: '#E57A00'
+				xrp: {
+					DEFAULT: '#00D4DD',
+					light: '#33E0E8',
+					dark: '#00B8C0'
 				},
 				price: {
 					up: '#10B981',

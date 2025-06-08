@@ -63,12 +63,12 @@ const Navbar = () => {
           <div className="bg-satstreet-dark rounded-full p-1 flex items-center justify-center">
             <img 
               src="https://wacicyiidaysfjdiaeim.supabase.co/storage/v1/object/public/product-images-2//satstreet_logo_vector.svg" 
-              alt="SatStreet" 
+              alt="xStreet" 
               className="h-12 w-auto mr-3"
             />
           </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bitcoin-gradient">
-            SatStreet
+          <span className="text-xl font-bold bg-clip-text text-transparent xrp-gradient">
+            xStreet
           </span>
         </Link>
 
@@ -84,9 +84,9 @@ const Navbar = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={navToWallet}
-                className="text-sm border-bitcoin/30 hover:border-bitcoin hover:bg-satstreet-light"
+                className="text-sm border-xrp/30 hover:border-xrp hover:bg-satstreet-light"
               >
-                <span className="font-mono">{user?.walletBalance.toLocaleString()} sats</span>
+                <span className="font-mono">{user?.walletBalance.toLocaleString()} XRP</span>
               </Button>
               
               <DropdownMenu>
@@ -111,7 +111,7 @@ const Navbar = () => {
               >
                 <ShoppingCart />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-bitcoin text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-xrp text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
@@ -122,7 +122,7 @@ const Navbar = () => {
               <Button 
                 onClick={navToLogin} 
                 variant="default"
-                className="bg-bitcoin hover:bg-bitcoin-dark"
+                className="bg-xrp hover:bg-xrp-dark"
               >
                 Login
               </Button>
@@ -134,7 +134,7 @@ const Navbar = () => {
               >
                 <ShoppingCart />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-bitcoin text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-xrp text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
@@ -154,7 +154,7 @@ const Navbar = () => {
           >
             <ShoppingCart />
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-bitcoin text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-xrp text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {totalItems}
               </span>
             )}
@@ -185,7 +185,7 @@ const Navbar = () => {
                 onClick={navToWallet}
                 className="justify-start"
               >
-                <span className="font-mono mr-2">{user?.walletBalance.toLocaleString()} sats</span>
+                <span className="font-mono mr-2">{user?.walletBalance.toLocaleString()} XRP</span>
                 My Wallet
               </Button>
               <Button 
@@ -202,7 +202,7 @@ const Navbar = () => {
               <Button 
                 onClick={navToLogin} 
                 variant="default" 
-                className="w-full bg-bitcoin hover:bg-bitcoin-dark"
+                className="w-full bg-xrp hover:bg-xrp-dark"
               >
                 Login
               </Button>

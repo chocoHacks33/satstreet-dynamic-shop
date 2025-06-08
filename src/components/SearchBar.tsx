@@ -30,7 +30,7 @@ const SearchBar = ({
         placeholder={placeholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="pr-10 bg-satstreet-light border-bitcoin/30 focus:border-bitcoin focus:ring-bitcoin"
+        className="pr-10 bg-satstreet-light border-xrp/30 focus:border-xrp focus:ring-xrp"
       />
       <Button 
         type="submit" 

@@ -115,7 +115,7 @@ const Index = () => {
             </p>
             <button 
               onClick={() => refreshData()} 
-              className="bg-bitcoin hover:bg-bitcoin-dark text-white px-4 py-2 rounded-md"
+              className="bg-xrp hover:bg-xrp-dark text-white px-4 py-2 rounded-md"
             >
               Retry
             </button>
@@ -135,7 +135,7 @@ const Index = () => {
           <h1 className="text-3xl font-bold mb-2">
             {searchQuery 
               ? `Search results for "${searchQuery}"` 
-              : 'Explore Bitcoin Products'}
+              : 'Explore XRP Products'}
           </h1>
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground">
@@ -150,7 +150,7 @@ const Index = () => {
                 onClick={handleManualRefresh}
                 variant="ghost"
                 size="sm"
-                className={`rounded-full p-1 hover:bg-satstreet-light transition-all ${isRefreshing ? 'animate-spin text-bitcoin' : ''}`}
+                className={`rounded-full p-1 hover:bg-satstreet-light transition-all ${isRefreshing ? 'animate-spin text-xrp' : ''}`}
                 title="Refresh now"
                 disabled={isRefreshing}
               >

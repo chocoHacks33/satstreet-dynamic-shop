@@ -75,24 +75,33 @@ export type Database = {
       }
       price_history: {
         Row: {
+          demand_number: number | null
           explanation: string | null
           id: string
+          momentum: number | null
           price: number
           product_id: string
+          supply_number: number | null
           timestamp: string
         }
         Insert: {
+          demand_number?: number | null
           explanation?: string | null
           id?: string
+          momentum?: number | null
           price: number
           product_id: string
+          supply_number?: number | null
           timestamp?: string
         }
         Update: {
+          demand_number?: number | null
           explanation?: string | null
           id?: string
+          momentum?: number | null
           price?: number
           product_id?: string
+          supply_number?: number | null
           timestamp?: string
         }
         Relationships: [
@@ -183,33 +192,45 @@ export type Database = {
       }
       products: {
         Row: {
+          classic_address: string | null
           created_at: string
           description: string | null
           id: string
           name: string
           price: number
+          private_key: string | null
+          public_key: string | null
+          seed: string | null
           shop_id: string | null
           shop_name: string
           stock_count: number
           updated_at: string
         }
         Insert: {
+          classic_address?: string | null
           created_at?: string
           description?: string | null
           id?: string
           name: string
           price: number
+          private_key?: string | null
+          public_key?: string | null
+          seed?: string | null
           shop_id?: string | null
           shop_name: string
           stock_count?: number
           updated_at?: string
         }
         Update: {
+          classic_address?: string | null
           created_at?: string
           description?: string | null
           id?: string
           name?: string
           price?: number
+          private_key?: string | null
+          public_key?: string | null
+          seed?: string | null
           shop_id?: string | null
           shop_name?: string
           stock_count?: number
@@ -228,30 +249,42 @@ export type Database = {
       profiles: {
         Row: {
           bitcoin_address: string | null
+          classic_address: string | null
           created_at: string
           email: string
           id: string
+          private_key: string | null
+          public_key: string | null
           role: Database["public"]["Enums"]["user_role"]
+          seed: string | null
           updated_at: string
           username: string | null
           wallet_balance: number
         }
         Insert: {
           bitcoin_address?: string | null
+          classic_address?: string | null
           created_at?: string
           email: string
           id: string
+          private_key?: string | null
+          public_key?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          seed?: string | null
           updated_at?: string
           username?: string | null
           wallet_balance?: number
         }
         Update: {
           bitcoin_address?: string | null
+          classic_address?: string | null
           created_at?: string
           email?: string
           id?: string
+          private_key?: string | null
+          public_key?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          seed?: string | null
           updated_at?: string
           username?: string | null
           wallet_balance?: number
@@ -265,6 +298,7 @@ export type Database = {
           id: string
           owner_id: string
           public_bitcoin_address: string | null
+          public_xrp_address: string | null
           shop_name: string
           updated_at: string
         }
@@ -274,6 +308,7 @@ export type Database = {
           id?: string
           owner_id: string
           public_bitcoin_address?: string | null
+          public_xrp_address?: string | null
           shop_name: string
           updated_at?: string
         }
@@ -283,6 +318,7 @@ export type Database = {
           id?: string
           owner_id?: string
           public_bitcoin_address?: string | null
+          public_xrp_address?: string | null
           shop_name?: string
           updated_at?: string
         }

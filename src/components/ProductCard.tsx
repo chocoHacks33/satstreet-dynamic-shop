@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PriceIndicator from './PriceIndicator';
@@ -59,7 +58,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   const handleStockClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open('https://btc.tokenview.io/en/tx/cb01ea705494ce66d7e5b7cb51bb5b39b8e8ce31e168d1bd7dda253af359cc77', '_blank');
+    window.open('https://xrpscan.com/tx/cb01ea705494ce66d7e5b7cb51bb5b39b8e8ce31e168d1bd7dda253af359cc77', '_blank');
   };
 
   // Get a truncated version of the description if it's too long
@@ -83,7 +82,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Card 
       onClick={handleViewProduct}
-      className="overflow-hidden border-satstreet-light hover:border-bitcoin/50 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-satstreet-medium"
+      className="overflow-hidden border-satstreet-light hover:border-xrp/50 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-satstreet-medium"
     >
       <div className="aspect-square overflow-hidden bg-satstreet-dark/50">
         <img 
@@ -113,14 +112,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
               <TooltipTrigger asChild>
                 <span 
                   onClick={handleStockClick}
-                  className="inline-flex items-center text-xs cursor-pointer text-muted-foreground hover:text-bitcoin"
+                  className="inline-flex items-center text-xs cursor-pointer text-muted-foreground hover:text-xrp"
                 >
                   <span>Stock: {product.stockCount || 0}</span>
                   <ExternalLink size={12} className="ml-1" />
                 </span>
               </TooltipTrigger>
               <TooltipContent className="max-w-[250px] bg-satstreet-dark border-satstreet-light">
-                <p>Stock verified via Bitcoin blockchain commitments from the supplier using OP_RETURN</p>
+                <p>Stock verified via XRP Ledger commitments from the supplier using memo fields</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -140,7 +139,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           variant="default" 
           size="sm"
           onClick={handleAddToCart}
-          className="text-xs bg-bitcoin hover:bg-bitcoin-dark"
+          className="text-xs bg-xrp hover:bg-xrp-dark"
         >
           Add to Cart
         </Button>

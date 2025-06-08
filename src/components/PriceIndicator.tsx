@@ -40,7 +40,7 @@ const PriceIndicator = ({
   return (
     <div className={`flex items-center ${getColorIntensity()} ${isPositive ? 'animate-price-pulse-up' : 'animate-price-pulse-down'}`}>
       <span className={`font-mono font-medium ${textSizeClasses}`}>
-        {priceInSats.toLocaleString()} sats
+        {priceInSats.toLocaleString()} XRP
       </span>
       <div className="flex items-center ml-2">
         <Arrow size={iconSize} className="mr-1" />
